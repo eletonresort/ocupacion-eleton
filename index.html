@@ -206,7 +206,11 @@ button{cursor:pointer}
 .mini-tabla{width:100%;border-collapse:collapse;margin:4px 0 12px}
 .mini-tabla th{font-size:10px;letter-spacing:.06em;color:var(--tinta-2);text-align:left;padding:0 6px 4px 0;font-weight:700}
 .mini-tabla td{padding:0 6px 5px 0;font-size:12.5px}
-.mini-tabla td:first-child{color:var(--tinta-2);white-space:nowrap;width:100px}
+.mini-tabla td:first-child{color:var(--tinta-2);white-space:nowrap;width:96px}
+.mini-tabla td:nth-child(2){width:64px}
+.mini-tabla td:nth-child(3){width:82px}
+.mini-tabla .combo select,.mini-tabla .combo input{font-size:12px;padding:5px 6px}
+.mini-tabla .nada{color:var(--linea)}
 .mini-tabla input{width:100%;border:1px solid var(--linea);border-radius:var(--r);padding:5px 7px}
 .campo.destacado input{border:2px solid var(--verde-osc);font-size:17px;font-weight:700;padding:9px 10px}
 .campo.destacado label{color:var(--verde-osc)}
@@ -563,7 +567,7 @@ function tablaServicios(serv){
   const celda = (g, nombre)=>{
     const c = (g.comidas||[]).find(c=>c.n===nombre);
     if(!c) return "—";
-    return `${c.x!=null?`<b>${c.x}</b>`:""}${c.h?`<span>${esc(c.h)}</span>`:""}${c.t?`<span class="${c.gala?"gala-tag":""}">${esc(c.t)}</span>`:""}` || "—";
+    return `${c.x!=null?`<b>${c.x}</b>`:""}${c.h?`<span>${esc(c.h)}</span>`:""}${c.t?`<span class="${c.gala?"gala-tag":""}">${esc(c.t)}</span>`:""}`;
   };
   return `<table class="tl serv">
     <tr><th>GRUPO</th>${cols.map(c=>`<th>${c.toUpperCase()}</th>`).join("")}<th>ESPACIO</th></tr>
@@ -792,7 +796,13 @@ function filaEvento(v){
     <button class="bt borrar mini" onclick="this.closest('.ev-form').remove(); recalcular();">Quitar evento</button>
   </div>`;
 }
-const COMIDAS_APP = ["Desayuno","Almuerzo","Merienda","Cena","Quinta comida"];
+const COMIDAS_APP = [
+  { n:"Desayuno",      lista:"Tipos de desayuno" },
+  { n:"Almuerzo",      lista:"Tipos de almuerzo" },
+  { n:"Merienda",      lista:"Tipos de merienda" },
+  { n:"Cena",          lista:"Tipos de cena" },
+  { n:"Quinta comida", lista:null }
+];
 /** Una tarjeta por grupo, con una fila por comida: pax y horario. */
 function filaServicio(g){
   g = g || { comidas: [] };
@@ -800,21 +810,20 @@ function filaServicio(g){
     const c = (g.comidas||[]).find(x=>x.n===nombre);
     return c ? (c[campo] ?? "") : "";
   };
-  const tipoCena = dato("Cena","t");
   return `<div class="ev-item serv-form">
     <div class="f2">
       <div class="campo"><label>Grupo / evento</label><input class="s-g" value="${esc(g.g||"")}"></div>
       <div class="campo"><label>Pax total</label><input class="s-x" type="number" min="0" value="${esc(g.x??"")}"></div>
     </div>
     <table class="mini-tabla">
-      <tr><th></th><th>PAX</th><th>HORARIO</th></tr>
-      ${COMIDAS_APP.map(c=>`<tr data-comida="${c}">
-        <td>${c}</td>
-        <td><input class="c-x" type="number" min="0" value="${esc(dato(c,"x"))}"></td>
-        <td><input class="c-h" value="${esc(dato(c,"h"))}" placeholder="—"></td>
+      <tr><th></th><th>PAX</th><th>HORARIO</th><th>TIPO</th></tr>
+      ${COMIDAS_APP.map(c=>`<tr data-comida="${c.n}">
+        <td>${c.n}</td>
+        <td><input class="c-x" type="number" min="0" value="${esc(dato(c.n,"x"))}"></td>
+        <td><input class="c-h" value="${esc(dato(c.n,"h"))}" placeholder="13:30"></td>
+        <td>${c.lista ? combo("c-t", c.lista, dato(c.n,"t")) : "<span class='nada'>—</span>"}</td>
       </tr>`).join("")}
     </table>
-    <div class="campo"><label>Tipo de cena</label>${combo("s-t","Tipos de cena",tipoCena)}</div>
     <div class="campo"><label>Espacio</label>${combo("s-e","Espacios",g.esp)}</div>
     <div class="f2">
       <div class="campo"><label>Dietas especiales</label><input class="s-d" value="${esc(g.dietas||"")}"></div>
@@ -830,11 +839,11 @@ function agregarServicio(){
 function leerServiciosForm(){
   return [...document.querySelectorAll("#servs .serv-form")].map(n=>{
     const g = c => { const el = n.querySelector(c); return el ? el.value.trim() : ""; };
-    const tipoCena = g(".s-t");
     const comidas = [...n.querySelectorAll("tr[data-comida]")].map(tr=>{
       const nombre = tr.dataset.comida;
       const x = tr.querySelector(".c-x").value.trim(), hh = tr.querySelector(".c-h").value.trim();
-      const t = nombre==="Cena" ? tipoCena : "";
+      const et = tr.querySelector(".c-t");
+      const t = et ? et.value.trim() : "";
       if(!x && !hh && !t) return null;
       return { n:nombre, x: x===""?null:+x, h:hh, t:t, gala: t.toUpperCase().includes("GALA") };
     }).filter(Boolean);
