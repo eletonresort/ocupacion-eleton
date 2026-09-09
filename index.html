@@ -67,7 +67,7 @@ button{cursor:pointer}
 .dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px}
 .dow div{font-size:10.5px;letter-spacing:.1em;color:var(--tinta-2);text-align:center;font-weight:600}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.dia{position:relative;background:#fff;border:1px solid var(--linea);border-radius:var(--r);min-height:118px;padding:7px 8px;text-align:left;overflow:hidden;display:flex;flex-direction:column;gap:4px}
+.dia{position:relative;background:#fff;border:1px solid var(--linea);border-radius:var(--r);min-height:96px;padding:7px 8px;text-align:left;overflow:hidden;display:flex;flex-direction:column;gap:4px}
 .dia .fill{position:absolute;left:0;right:0;bottom:0;background:var(--verde);opacity:.13;pointer-events:none}
 .dia .num{font-family:'Playfair Display',serif;font-size:17px;font-weight:500;line-height:1;position:relative}
 .dia .pct{position:absolute;top:6px;right:8px;font-size:12px;font-weight:700;color:var(--verde-osc)}
@@ -78,10 +78,51 @@ button{cursor:pointer}
 .dia.lleno .pct{color:var(--laton)}
 .dia.sel{box-shadow:0 0 0 2px var(--verde-osc)}
 .chips{display:flex;flex-direction:column;gap:2px;margin-top:auto;position:relative}
-.chip{font-size:10px;line-height:1.3;padding:2px 5px;border-radius:2px;background:#eef2ef;color:var(--verde-osc);border-left:3px solid var(--verde);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{font-size:9.5px;line-height:1.3;padding:1px 5px;border-radius:2px;background:#eef2ef;color:var(--verde-osc);border-left:3px solid var(--verde);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chip.est{border-left-color:var(--pizarra);color:var(--pizarra);background:#eef1f4}
 .chip.egr{border-left-color:var(--laton);color:#7d5a1f;background:#f6f0e4}
 .chip.mas{border:0;background:none;color:var(--tinta-2);padding-left:0}
+
+/* ---------- vista semanal ---------- */
+.semana{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:14px}
+.sdia{position:relative;background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:14px 12px 12px;text-align:left;overflow:hidden;min-height:132px;display:flex;flex-direction:column}
+.sdia .fill{position:absolute;left:0;right:0;bottom:0;background:var(--verde);opacity:.12;pointer-events:none}
+.sdia .dow{font-size:10px;letter-spacing:.14em;color:var(--tinta-2);font-weight:700;position:relative}
+.sdia .n{font-family:'Playfair Display',serif;font-size:42px;font-weight:500;line-height:.95;position:relative;margin:2px 0}
+.sdia .mm{font-size:11px;color:var(--tinta-2);position:relative;margin-bottom:8px}
+.sdia .oc{position:relative;margin-top:auto;font-size:11.5px;color:var(--tinta-2)}
+.sdia .oc b{display:block;font-size:20px;font-weight:700;color:var(--verde-osc);font-family:Montserrat;line-height:1.1}
+.sdia .cnt{position:relative;font-size:11px;color:var(--verde);font-weight:600;margin-top:6px}
+.sdia.hoy{border-color:var(--verde-osc);box-shadow:inset 0 0 0 1px var(--verde-osc)}
+.sdia.sel{background:var(--verde-osc);border-color:var(--verde-osc)}
+.sdia.sel .dow,.sdia.sel .mm,.sdia.sel .oc{color:rgba(255,255,255,.7)}
+.sdia.sel .n,.sdia.sel .oc b,.sdia.sel .cnt{color:#fff}
+.sdia.sel .fill{background:#fff;opacity:.14}
+.sdia.lleno .oc b{color:var(--laton)}
+
+.ruta{background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:20px 24px}
+.ruta-cab{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--linea);padding-bottom:14px;margin-bottom:16px}
+.ruta-cab h3{font-family:'Playfair Display',serif;font-size:26px;margin:0;font-weight:500;text-transform:capitalize}
+.ruta-cab .kk{display:flex;gap:24px;margin-left:auto}
+.ruta-cab .kk div{font-size:11px;color:var(--tinta-2)}
+.ruta-cab .kk b{display:block;font-family:'Playfair Display',serif;font-size:22px;font-weight:500;color:var(--negro);line-height:1.1}
+.ruta h4{font-size:11px;letter-spacing:.1em;color:var(--tinta-2);font-weight:700;margin:18px 0 8px}
+.ruta h4:first-of-type{margin-top:0}
+.hosp{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.hosp span{background:#eef2ef;border-left:3px solid var(--verde);padding:5px 10px;border-radius:2px;font-size:12.5px}
+.hosp span b{color:var(--verde-osc)}
+.tl{width:100%;border-collapse:collapse}
+.tl th{text-align:left;font-size:10px;letter-spacing:.1em;color:var(--tinta-2);border-bottom:1px solid var(--linea);padding:0 12px 7px 0;font-weight:700}
+.tl td{border-bottom:1px solid var(--linea);padding:10px 12px 10px 0;vertical-align:top;font-size:13px}
+.tl td:first-child{white-space:nowrap;width:94px;font-weight:700;color:var(--verde-osc)}
+.tl td:last-child{width:210px;color:var(--tinta-2);font-size:12.5px}
+.tl .ev b{display:block}
+.tl .ev span{font-size:12px;color:var(--tinta-2)}
+.tl .aloj{font-size:10px;font-weight:600;color:#fff;background:var(--verde);padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle}
+.tl tr.sinh td:first-child{color:var(--tinta-2);font-weight:400;font-style:italic}
+.ruta .obs{margin-top:16px;background:var(--papel);border-radius:var(--r);padding:12px 14px;font-size:12.5px;white-space:pre-wrap}
+.ruta-pie{margin-top:16px;display:flex;gap:8px}
+@media(max-width:900px){.semana{grid-template-columns:repeat(2,1fr)}.tl td:last-child{width:auto}}
 
 /* ---------- agenda ---------- */
 .agenda{display:flex;flex-direction:column;gap:2px}
@@ -204,7 +245,8 @@ button{cursor:pointer}
 
 <div class="tabs">
   <div class="tabs-in">
-    <button class="tab" data-vista="cal" aria-selected="true">Calendario</button>
+    <button class="tab" data-vista="sem" aria-selected="true">Semana</button>
+    <button class="tab" data-vista="cal" aria-selected="false">Mes</button>
     <button class="tab" data-vista="agenda" aria-selected="false">Agenda</button>
     <button class="tab" data-vista="fichas" aria-selected="false">Fichas de eventos</button>
     <button class="tab" data-vista="grupos" aria-selected="false">Estudiantil y egresos</button>
@@ -214,7 +256,21 @@ button{cursor:pointer}
 </div>
 
 <div class="wrap">
-  <section id="vista-cal">
+  <section id="vista-sem">
+    <div class="mes-bar">
+      <div class="nav">
+        <button id="semPrev" aria-label="Semana anterior">‹</button>
+        <button id="semNext" aria-label="Semana siguiente">›</button>
+        <button class="hoy-btn" id="semHoy">Esta semana</button>
+      </div>
+      <h2 class="mes-tit" id="semTit"></h2>
+      <div class="resumen" id="semKpis"></div>
+    </div>
+    <div class="semana" id="semana"></div>
+    <div id="semDet"></div>
+  </section>
+
+  <section id="vista-cal" class="oculto">
     <div class="mes-bar">
       <div class="nav">
         <button id="prev" aria-label="Mes anterior">‹</button>
@@ -398,13 +454,13 @@ function pintarCal(){
     if(e.p>=95) cls.push("lleno");
     if(f===seleccion) cls.push("sel");
     if(!vis) cls.push("apagado");
-    const chips = evs.slice(0,3).map(v=>`<div class="chip ${v.tipo}${v.a?" aloj":""}" title="${v.a?"Con alojamiento":""}">${esc(v.n||v.s||"Evento")}</div>`).join("")
-      + (evs.length>3?`<div class="chip mas">+${evs.length-3} más</div>`:"");
+    const chips = evs.slice(0,2).map(v=>`<div class="chip ${v.tipo}${v.a?" aloj":""}" title="${v.a?"Con alojamiento":""}">${esc(v.n||v.s||"Evento")}</div>`).join("")
+      + (evs.length>2?`<div class="chip mas">+${evs.length-2} más</div>`:"");
     html += `<button class="${cls.join(" ")}" data-f="${f}" style="${vis?"":"opacity:.25"}">
       <div class="fill" style="height:${e.p!=null?Math.min(100,e.p):0}%"></div>
       <div class="num">${dd}</div>
       ${e.p!=null?`<div class="pct">${e.p}%</div>`:""}
-      <div class="pax">${e.d!=null?e.d+" duermen":"&nbsp;"}${e.b!=null?" · "+e.b+" desayunan":""}</div>
+      <div class="pax">${e.d!=null?e.d+" duermen":"&nbsp;"}</div>
       <div class="chips">${chips}</div>
     </button>`;
   }
@@ -414,6 +470,106 @@ function pintarCal(){
     <div class="k"><b>${llenos}</b><span>días al 95% o más</span></div>
     <div class="k"><b>${nEv}</b><span>eventos y grupos</span></div>`;
 }
+
+/* ---------------- vista semanal ---------------- */
+const DOWC = ["LUN","MAR","MIÉ","JUE","VIE","SÁB","DOM"];
+let cursorSem = lunesDe(new Date()), diaSem = hoyISO;
+
+function lunesDe(d){
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  x.setDate(x.getDate() - ((x.getDay()+6)%7));
+  return x;
+}
+/** Saca la primera hora que aparezca en el texto, para poder ordenar. */
+function minutos(txt){
+  const m = String(txt||"").match(/(\d{1,2})[:.](\d{2})/);
+  if(!m) return null;
+  return (+m[1])*60 + (+m[2]);
+}
+function ordenarPorHora(evs){
+  return evs.slice().sort((a,b)=>{
+    const x = minutos(a.h), y = minutos(b.h);
+    if(x==null && y==null) return 0;
+    if(x==null) return 1;
+    if(y==null) return -1;
+    return x-y;
+  });
+}
+
+function pintarSemana(){
+  const ini = new Date(cursorSem), fin = new Date(cursorSem.getTime()+6*864e5);
+  document.getElementById("semTit").innerHTML = ini.getMonth()===fin.getMonth()
+    ? `${ini.getDate()} al ${fin.getDate()} de <em>${MES[fin.getMonth()]}</em>`
+    : `${ini.getDate()} ${MES[ini.getMonth()].slice(0,3)} al ${fin.getDate()} ${MES[fin.getMonth()].slice(0,3)} <em>${fin.getFullYear()}</em>`;
+
+  let html = "", sum=0, n=0, nev=0, maxA=0;
+  for(let i=0;i<7;i++){
+    const f = iso(new Date(cursorSem.getTime()+i*864e5)), e = dias[f]||{}, evs = eventosDe(f);
+    if(e.p!=null){ sum+=e.p; n++; }
+    nev += evs.length;
+    maxA = Math.max(maxA, alojados(e.ev));
+    const x = fromISO(f);
+    const cls = ["sdia"];
+    if(f===hoyISO) cls.push("hoy");
+    if(f===diaSem) cls.push("sel");
+    if(e.p>=95) cls.push("lleno");
+    html += `<button class="${cls.join(" ")}" data-f="${f}">
+      <div class="fill" style="height:${e.p!=null?Math.min(100,e.p):0}%"></div>
+      <div class="dow">${DOWC[i]}</div>
+      <div class="n">${x.getDate()}</div>
+      <div class="mm">${MES[x.getMonth()]}</div>
+      <div class="oc"><b>${e.p!=null?e.p+"%":"—"}</b>${e.d!=null?e.d+" duermen":"sin datos"}</div>
+      ${evs.length?`<div class="cnt">${evs.length} ${evs.length===1?"evento":"eventos"}</div>`:""}
+    </button>`;
+  }
+  document.getElementById("semana").innerHTML = html;
+  document.getElementById("semKpis").innerHTML = `
+    <div class="k"><b>${n?Math.round(sum/n)+"%":"—"}</b><span>promedio de la semana</span></div>
+    <div class="k"><b>${nev}</b><span>eventos y grupos</span></div>`;
+  pintarRuta();
+}
+
+/** El detalle del día, con el mismo orden que la hoja de ruta: hora, servicio, espacio. */
+function pintarRuta(){
+  const f = diaSem, e = dias[f]||{}, x = fromISO(f);
+  const evs = ordenarPorHora(eventosDe(f));
+  const hosp = (e.ev||[]).filter(v=>v.a);
+  const filas = evs.map(v=>`<tr class="${v.h?"":"sinh"}">
+      <td>${esc(v.h||"a coordinar")}</td>
+      <td class="ev"><b>${esc(v.n||"Evento")}${v.a?'<span class="aloj">alojamiento</span>':""}</b>
+        <span>${[v.s, v.x?v.x+" pax":"", v.tipo==="est"?"Grupo estudiantil":v.tipo==="egr"?"Egreso":""].filter(Boolean).map(esc).join(" · ")}</span>
+        ${v.i?`<span>${esc(v.i)}</span>`:""}</td>
+      <td>${esc(v.e||"—")}</td>
+    </tr>`).join("");
+
+  document.getElementById("semDet").innerHTML = `<div class="ruta">
+    <div class="ruta-cab">
+      <h3>${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}</h3>
+      <div class="kk">
+        <div><b>${e.p!=null?e.p+"%":"—"}</b>ocupación</div>
+        <div><b>${e.d??"—"}</b>duermen</div>
+        <div><b>${e.b??"—"}</b>desayunan</div>
+      </div>
+    </div>
+    ${hosp.length?`<h4>GRUPOS HOSPEDADOS</h4><div class="hosp">${hosp.map(v=>`<span><b>${esc(v.n)}</b>${v.x?" · "+esc(v.x)+" pax":""}</span>`).join("")}</div>`:""}
+    ${e.td||e.e?`<h4>DESAYUNO</h4><div class="hosp"><span>${esc(e.td||"—")}${e.e?" · "+esc(e.e):""}${e.b!=null?" · "+e.b+" pax":""}</span></div>`:""}
+    <h4>CRONOGRAMA DEL DÍA</h4>
+    ${filas ? `<table class="tl"><tr><th>HORA</th><th>SERVICIO / DETALLE</th><th>ESPACIO</th></tr>${filas}</table>`
+            : '<p class="sin">No hay eventos cargados para este día.</p>'}
+    ${e.o?`<div class="obs"><b>Observaciones:</b> ${esc(e.o)}</div>`:""}
+    <div class="ruta-pie">
+      <button class="bt sec mini" onclick="abrirDia('${f}')">${edicion?"Editar este día":"Ver ficha del día"}</button>
+    </div>
+  </div>`;
+}
+
+document.getElementById("semana").addEventListener("click", ev=>{
+  const b = ev.target.closest(".sdia[data-f]");
+  if(b){ diaSem = b.dataset.f; pintarSemana(); }
+});
+document.getElementById("semPrev").onclick = ()=>{ cursorSem = new Date(cursorSem.getTime()-7*864e5); diaSem = iso(cursorSem); pintarSemana(); };
+document.getElementById("semNext").onclick = ()=>{ cursorSem = new Date(cursorSem.getTime()+7*864e5); diaSem = iso(cursorSem); pintarSemana(); };
+document.getElementById("semHoy").onclick = ()=>{ cursorSem = lunesDe(new Date()); diaSem = hoyISO; pintarSemana(); };
 
 /* ---------------- agenda ---------------- */
 function pintarAgenda(){
@@ -647,7 +803,7 @@ function cerrar(){
   document.getElementById("panel").classList.remove("abierto");
   document.getElementById("panel").setAttribute("aria-hidden","true");
   document.getElementById("velo").classList.add("oculto");
-  seleccion = null; pintarCal();
+  seleccion = null; pintarCal(); pintarSemana();
 }
 function toast(t){
   const n = document.createElement("div"); n.className="aviso"; n.textContent=t;
@@ -670,7 +826,7 @@ document.getElementById("irHoy").onclick = ()=>{ cursor = new Date(); pintarCal(
 document.getElementById("q").addEventListener("input", e=>{ filtro = e.target.value.trim().toLowerCase(); pintarTodo(); });
 document.querySelectorAll(".tab").forEach(t=>t.onclick = ()=>{
   document.querySelectorAll(".tab").forEach(o=>o.setAttribute("aria-selected", o===t));
-  ["cal","agenda","fichas","grupos","hist"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
+  ["sem","cal","agenda","fichas","grupos","hist"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
 });
 document.getElementById("modoBtn").onclick = ()=>{
   if(edicion){ edicion=false; clave=""; aplicarModo(); toast("Volviste a solo visualización"); return; }
@@ -710,7 +866,7 @@ function aplicarModo(){
   pintarHist();
   if(seleccion) abrirDia(seleccion);
 }
-function pintarTodo(){ pintarHoy(); pintarCal(); pintarAgenda(); pintarFichas(); pintarGrupos(); pintarHist(); }
+function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarFichas(); pintarGrupos(); pintarHist(); }
 
 /* ---------------- carga desde la planilla ---------------- */
 function marcarActualizado(t){
