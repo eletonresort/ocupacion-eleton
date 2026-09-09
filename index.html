@@ -153,6 +153,9 @@ button{cursor:pointer}
 .calc-t{font-size:12.5px;line-height:1.4}
 .calc-t b{font-size:15px}
 .calc-t span{display:block;color:rgba(255,255,255,.75);font-size:11.5px}
+.combo{display:flex;flex-direction:column;gap:5px}
+.combo select{width:100%;border:1px solid var(--linea);border-radius:var(--r);padding:7px 9px;background:#fff}
+.combo .combo-txt{width:100%;border:1px solid var(--verde);border-radius:var(--r);padding:7px 9px}
 .check{display:flex;align-items:center;gap:7px;font-size:12.5px;margin:2px 0 12px;cursor:pointer;color:var(--tinta-2)}
 .check input{width:15px;height:15px;accent-color:var(--verde-osc)}
 .tag{font-size:10px;font-weight:600;color:#fff;background:var(--verde);padding:1px 6px;border-radius:2px;vertical-align:middle}
@@ -297,14 +300,59 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;"
 function habs(p){ return p==null ? null : Math.round(p*CAP_HAB/100); }
 function alojados(evs){ return (evs||[]).reduce((t,v)=> t + (v.a ? (parseInt(v.x,10)||0) : 0), 0); }
 function pctDe(duermen){ return duermen==null ? null : Math.round(duermen*100/PLAZAS); }
-function lista(nombre){ return (DATA.listas && DATA.listas[nombre]) || []; }
-function opciones(nombre){ return lista(nombre).map(o=>`<option value="${esc(o)}">`).join(""); }
-function datalists(){
-  return `<datalist id="l-tipo">${opciones("Tipos de desayuno")}</datalist>
-    <datalist id="l-espdes">${opciones("Espacios de desayuno")}</datalist>
-    <datalist id="l-esp">${opciones("Espacios")}</datalist>
-    <datalist id="l-serv">${opciones("Servicios")}</datalist>
-    <datalist id="l-ev">${opciones("Eventos frecuentes")}</datalist>`;
+/* Si la planilla todavía no tiene la hoja Listas, la app usa estas opciones
+   para no quedarse en blanco. Cuando la hoja existe, manda la hoja. */
+const LISTAS_BASE = {
+  "Espacios": ["Restó & Grill","Sala Francisco","Salón Mahatma","Mahatma Lado A","Mahatma Lado B",
+               "Sala de Reuniones","Lobby","Deck","Keops","Pileta","Hotel completo","Espacio a confirmar"],
+  "Espacios de desayuno": ["Restó & Grill","Salón Mahatma","Hotel completo"],
+  "Tipos de desayuno": ["DB","DB Reduc","DB Estudiantil","DBR","PC","MAP","PC + Merienda + Quinta comida"],
+  "Servicios": ["PC","MAP","Pensión completa","Café concert","Merienda","Merienda Buffet",
+                "Desayuno Buffet","Almuerzo Buffet","Almuerzo emplatado","Cena Buffet","Cena emplatada",
+                "Cena de gala","Cena temática","Coffee Break","Finger Food","Barra de tragos",
+                "Panificación simple","Jarras de agua y copas","Agua, café y té",
+                "Proyector + Técnica","Operador y micrófono","Pantalla + micrófono",
+                "Egreso","Servicio a confirmar"],
+  "Eventos frecuentes": ["TEATRO","MERIENDA BUFFET","SUNSET DJ","BARRA DE TRAGOS","ALL INCLUSIVE",
+                         "EGRESO","GRUPO ESTUDIANTIL","EVENTO CORPORATIVO","CUMPLEAÑOS","CASAMIENTO",
+                         "REUNIÓN","CHARLA","PARTIDO / PROYECCIÓN","YOGA","EVENTO A CONFIRMAR"]
+};
+function lista(nombre){
+  const l = DATA.listas && DATA.listas[nombre];
+  return (l && l.length) ? l : (LISTAS_BASE[nombre] || []);
+}
+
+/**
+ * Desplegable con salida de escape: se elige de la lista o se escribe algo propio.
+ * El valor real queda en un input oculto, que es el que leen el formulario y el guardado.
+ */
+function combo(clave, nombreLista, valor){
+  const opts = lista(nombreLista);
+  const propio = valor && opts.indexOf(valor) < 0;
+  const id = clave.startsWith("#") ? `id="${clave.slice(1)}"` : `class="${clave}"`;
+  return `<div class="combo">
+    <select class="combo-sel">
+      <option value="">— Elegir —</option>
+      ${propio?`<option value="${esc(valor)}" selected>${esc(valor)}</option>`:""}
+      ${opts.map(o=>`<option value="${esc(o)}" ${o===valor?"selected":""}>${esc(o)}</option>`).join("")}
+      <option value="__otro">Escribir otro…</option>
+    </select>
+    <input class="combo-txt oculto" placeholder="Escribí la opción">
+    <input type="hidden" ${id} value="${esc(valor||"")}">
+  </div>`;
+}
+/** Mantiene sincronizados el desplegable, el campo libre y el valor real. */
+function comboCambio(nodo){
+  const caja = nodo.closest(".combo"); if(!caja) return;
+  const sel = caja.querySelector(".combo-sel"),
+        txt = caja.querySelector(".combo-txt"),
+        val = caja.querySelector("input[type=hidden]");
+  if(nodo === sel){
+    if(sel.value === "__otro"){ txt.classList.remove("oculto"); txt.value = ""; val.value = ""; txt.focus(); }
+    else { txt.classList.add("oculto"); val.value = sel.value; }
+  } else if(nodo === txt){
+    val.value = txt.value.trim();
+  }
 }
 function corto(f){ const x=fromISO(f); return x.getDate()+" "+MES[x.getMonth()].slice(0,3); }
 
@@ -477,8 +525,9 @@ function abrirDia(f){
       document.getElementById("manualBox").classList.toggle("oculto", !e.target.checked);
       recalcular();
     };
-    document.getElementById("pCuerpo").addEventListener("input", recalcular);
-    document.getElementById("pCuerpo").addEventListener("change", recalcular);
+    const cuerpo = document.getElementById("pCuerpo");
+    cuerpo.addEventListener("change", ev=>{ comboCambio(ev.target); recalcular(); });
+    cuerpo.addEventListener("input", ev=>{ comboCambio(ev.target); recalcular(); });
     recalcular();
   }
   pintarCal();
@@ -503,7 +552,7 @@ function vistaLectura(e, f){
 function formEdicion(e, ayer){
   const alo = alojados(e.ev);
   const part = e.pa ?? (e.d!=null ? Math.max(0, e.d - alo) : "");
-  return `${datalists()}<div class="calculo" id="calc"></div>
+  return `<div class="calculo" id="calc"></div>
     <div class="f3">
       <div class="campo"><label>Particulares que duermen</label><input id="part" type="number" min="0" value="${part}"></div>
       <div class="campo"><label>De eventos</label><input id="aloIn" value="${alo}" disabled></div>
@@ -512,8 +561,8 @@ function formEdicion(e, ayer){
     <label class="check"><input type="checkbox" id="manual" ${e.dm?"checked":""}> Cargar el total a mano</label>
     <div class="campo ${e.dm?"":"oculto"}" id="manualBox"><label>Total que duerme</label><input id="duer" type="number" min="0" value="${e.d??""}"></div>
     <div class="f2">
-      <div class="campo"><label>Tipo de desayuno</label><input id="td" list="l-tipo" value="${esc(e.td||"")}" placeholder="Elegí o escribí"></div>
-      <div class="campo"><label>Espacio del desayuno</label><input id="esp" list="l-espdes" value="${esc(e.e||"")}" placeholder="Elegí o escribí"></div>
+      <div class="campo"><label>Tipo de desayuno</label>${combo("#td","Tipos de desayuno",e.td)}</div>
+      <div class="campo"><label>Espacio del desayuno</label>${combo("#esp","Espacios de desayuno",e.e)}</div>
     </div>
     <div class="sec-tit">Eventos del día <button class="bt sec mini" id="addEv" style="float:right;margin-top:-4px">+ Agregar</button></div>
     <div id="evs">${(e.ev||[]).map(filaEvento).join("")}</div>
@@ -521,10 +570,10 @@ function formEdicion(e, ayer){
 }
 function filaEvento(v){
   return `<div class="ev-item ev-form">
-    <div class="campo"><label>Evento</label><input class="e-n" list="l-ev" value="${esc(v.n||"")}"></div>
+    <div class="campo"><label>Evento</label>${combo("e-n","Eventos frecuentes",v.n)}</div>
     <div class="f2">
-      <div class="campo"><label>Espacio</label><input class="e-e" list="l-esp" value="${esc(v.e||"")}"></div>
-      <div class="campo"><label>Servicio</label><input class="e-s" list="l-serv" value="${esc(v.s||"")}"></div>
+      <div class="campo"><label>Espacio</label>${combo("e-e","Espacios",v.e)}</div>
+      <div class="campo"><label>Servicio</label>${combo("e-s","Servicios",v.s)}</div>
     </div>
     <div class="f2">
       <div class="campo"><label>Pax</label><input class="e-x e-pax" type="number" min="0" value="${esc(v.x||"")}"></div>
