@@ -147,6 +147,28 @@ button{cursor:pointer}
 .ev-item .info{font-size:12.5px;margin-top:5px;white-space:pre-wrap}
 .sec-tit{font-size:11px;letter-spacing:.08em;color:var(--tinta-2);font-weight:700;margin:18px 0 8px;border-top:1px solid var(--linea);padding-top:12px}
 .nota{font-size:11.5px;color:var(--tinta-2);background:var(--papel);padding:8px 10px;border-radius:var(--r)}
+.calculo{display:flex;align-items:center;gap:14px;background:var(--verde-osc);color:#fff;border-radius:var(--r);padding:12px 16px;margin-bottom:16px}
+.calculo.alto{background:var(--laton)}
+.calc-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;line-height:1}
+.calc-t{font-size:12.5px;line-height:1.4}
+.calc-t b{font-size:15px}
+.calc-t span{display:block;color:rgba(255,255,255,.75);font-size:11.5px}
+.check{display:flex;align-items:center;gap:7px;font-size:12.5px;margin:2px 0 12px;cursor:pointer;color:var(--tinta-2)}
+.check input{width:15px;height:15px;accent-color:var(--verde-osc)}
+.tag{font-size:10px;font-weight:600;color:#fff;background:var(--verde);padding:1px 6px;border-radius:2px;vertical-align:middle}
+.chip.aloj{border-left-width:5px}
+.mov{background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:11px 14px;margin-bottom:6px;display:grid;grid-template-columns:150px 130px 1fr auto;gap:14px;align-items:start;max-width:1200px}
+.mov .cuando{font-size:12px;color:var(--tinta-2)}
+.mov .quien{font-size:12.5px;font-weight:600;color:var(--verde-osc)}
+.mov .que{font-size:12.5px}
+.mov .que .dia{color:var(--laton);font-weight:600;margin-right:6px}
+.mov.deshecho{opacity:.55}
+.mov.deshecho .que{text-decoration:line-through}
+.ingreso{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:var(--r);padding:24px 26px;width:min(380px,92vw);z-index:70;box-shadow:0 20px 60px rgba(13,84,63,.25)}
+.ingreso h3{font-family:'Playfair Display',serif;font-size:22px;margin:0 0 4px;font-weight:500}
+.ingreso p{margin:0 0 16px;font-size:12.5px;color:var(--tinta-2)}
+.ingreso-pie{display:flex;gap:8px;align-items:center;margin-top:16px}
+.ingreso .err{font-size:12px;color:#b4483c}
 .velo{position:fixed;inset:0;background:rgba(37,37,37,.28);z-index:50}
 .aviso{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--verde-osc);color:#fff;padding:10px 18px;border-radius:999px;font-size:13px;z-index:80}
 .tabla-est{width:100%;border-collapse:collapse;background:#fff;font-size:13px}
@@ -183,6 +205,7 @@ button{cursor:pointer}
     <button class="tab" data-vista="agenda" aria-selected="false">Agenda</button>
     <button class="tab" data-vista="fichas" aria-selected="false">Fichas de eventos</button>
     <button class="tab" data-vista="grupos" aria-selected="false">Estudiantil y egresos</button>
+    <button class="tab" data-vista="hist" aria-selected="false">Historial</button>
     <div class="buscar"><input id="q" type="search" placeholder="Buscar evento, grupo o colegio"></div>
   </div>
 </div>
@@ -212,6 +235,13 @@ button{cursor:pointer}
     <div class="fichas" id="fichas"></div>
   </section>
 
+  <section id="vista-hist" class="oculto">
+    <div class="mes-bar"><h2 class="mes-tit">Historial de movimientos</h2>
+      <div class="resumen"><span class="nota" style="max-width:420px">Cada cambio guardado desde la app queda registrado acá y en la hoja Historial de la planilla.</span></div>
+    </div>
+    <div id="hist"></div>
+  </section>
+
   <section id="vista-grupos" class="oculto">
     <div class="mes-bar"><h2 class="mes-tit">Estudiantil y egresos</h2></div>
     <div class="dos-col">
@@ -222,6 +252,19 @@ button{cursor:pointer}
 </div>
 
 <div class="velo oculto" id="velo"></div>
+
+<div class="velo oculto" id="veloIngreso"></div>
+<div class="ingreso oculto" id="ingreso">
+  <h3>Entrar en modo edición</h3>
+  <p>Tu nombre queda registrado en el historial junto a cada cambio.</p>
+  <div class="campo"><label>Nombre</label><input id="inUsuario" placeholder="Nombre y apellido"></div>
+  <div class="campo"><label>Clave de gerencia</label><input id="inClave" type="password"></div>
+  <div class="ingreso-pie">
+    <button class="bt" id="inEntrar">Entrar</button>
+    <button class="bt sec" id="inCancelar">Cancelar</button>
+    <span class="err" id="inErr"></span>
+  </div>
+</div>
 <aside class="panel" id="panel" aria-hidden="true">
   <header>
     <div><h3 id="pTit"></h3><p id="pSub"></p></div>
@@ -237,9 +280,9 @@ button{cursor:pointer}
    ============================================================ */
 const API = "https://script.google.com/macros/s/AKfycbzDdzdXls0sgSywRgOjId0K4bShJk2mlfDiUao_yN6orK3NikUNzhkMz91jKfCBRmJooA/exec";
 
-const CAP_HAB = 109, CAP_PAX = 250;
+let PLAZAS = 250, CAP_HAB = 109;
 let DATA = { dias: [], fichas: [], estudiantil: {}, egresos: {} };
-let clave = "";
+let clave = "", usuario = "";
 const dias = {};
 const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 const DOW = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
@@ -252,6 +295,8 @@ function fromISO(s){ const [a,b,c]=s.split("-").map(Number); return new Date(a,b
 function d(f){ return dias[f] || (dias[f] = {f}); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 function habs(p){ return p==null ? null : Math.round(p*CAP_HAB/100); }
+function alojados(evs){ return (evs||[]).reduce((t,v)=> t + (v.a ? (parseInt(v.x,10)||0) : 0), 0); }
+function pctDe(duermen){ return duermen==null ? null : Math.round(duermen*100/PLAZAS); }
 function corto(f){ const x=fromISO(f); return x.getDate()+" "+MES[x.getMonth()].slice(0,3); }
 
 function eventosDe(f){
@@ -271,7 +316,7 @@ function coincide(f){
 function pintarHoy(){
   const e = dias[hoyISO]||{}, m = dias[iso(new Date(HOY.getTime()+864e5))]||{};
   document.getElementById("hoyKpis").innerHTML = `
-    <div class="k"><b>${e.p!=null?e.p+"%":"—"}</b><span>ocupación hoy${e.p!=null?" · "+habs(e.p)+" hab":""}</span></div>
+    <div class="k"><b>${e.p!=null?e.p+"%":"—"}</b><span>ocupación hoy</span></div>
     <div class="k"><b>${e.d??"—"}</b><span>duermen hoy</span></div>
     <div class="k"><b>${m.b ?? e.d ?? "—"}</b><span>desayunan mañana</span></div>
     <div class="k"><b>${eventosDe(hoyISO).length||"—"}</b><span>eventos hoy</span></div>`;
@@ -296,7 +341,7 @@ function pintarCal(){
     if(e.p>=95) cls.push("lleno");
     if(f===seleccion) cls.push("sel");
     if(!vis) cls.push("apagado");
-    const chips = evs.slice(0,3).map(v=>`<div class="chip ${v.tipo}">${esc(v.n||v.s||"Evento")}</div>`).join("")
+    const chips = evs.slice(0,3).map(v=>`<div class="chip ${v.tipo}${v.a?" aloj":""}" title="${v.a?"Con alojamiento":""}">${esc(v.n||v.s||"Evento")}</div>`).join("")
       + (evs.length>3?`<div class="chip mas">+${evs.length-3} más</div>`:"");
     html += `<button class="${cls.join(" ")}" data-f="${f}" style="${vis?"":"opacity:.25"}">
       <div class="fill" style="height:${e.p!=null?Math.min(100,e.p):0}%"></div>
@@ -371,6 +416,32 @@ function tabla(obj){
     return `<tr><td>${x.getDate()} ${MES[x.getMonth()]} ${x.getFullYear()}</td><td>${obj[f].map(esc).join("<br>")}</td></tr>`;
   }).join("") || '<tr><td colspan="2" class="sin">Sin resultados</td></tr>');
 }
+function pintarHist(){
+  const l = (DATA.historial||[]).filter(m=>{
+    if(!filtro) return true;
+    return (m.usuario+" "+m.resumen+" "+m.dia+" "+m.accion).toLowerCase().includes(filtro);
+  });
+  document.getElementById("hist").innerHTML = l.length ? l.map(m=>{
+    const deshecho = (m.estado||"").toUpperCase()==="DESHECHO";
+    const x = m.dia ? fromISO(m.dia) : null;
+    return `<div class="mov ${deshecho?"deshecho":""}">
+      <div class="cuando">${esc(m.cuando)}<br><span style="font-size:11px">${esc(m.accion)}</span></div>
+      <div class="quien">${esc(m.usuario)}</div>
+      <div class="que">${x?`<span class="dia">${x.getDate()} ${MES[x.getMonth()].slice(0,3)}</span>`:""}${esc(m.resumen)}</div>
+      <div>${ edicion && m.reversible ? `<button class="bt sec mini" onclick="deshacer('${m.id}')">Deshacer</button>` : deshecho ? '<span class="nota">deshecho</span>' : "" }</div>
+    </div>`;
+  }).join("") : '<p class="sin">Todavía no hay movimientos registrados.</p>';
+}
+async function deshacer(id){
+  if(!confirm("¿Volver el día al estado anterior a ese cambio?")) return;
+  try{
+    const r = await fetch(API, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ clave, usuario, accion:"deshacer", id }) });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error);
+    await cargar(true); toast("Cambio deshecho");
+  }catch(err){ toast("No se pudo deshacer: " + err.message); }
+}
 function pintarGrupos(){
   document.getElementById("tEst").innerHTML = tabla(DATA.estudiantil);
   document.getElementById("tEgr").innerHTML = tabla(DATA.egresos);
@@ -393,32 +464,44 @@ function abrirDia(f){
     document.getElementById("guardar").onclick = guardar;
     document.getElementById("cancelar").onclick = cerrar;
     document.getElementById("addEv").onclick = ()=>{ agregarEvento(); };
-    document.getElementById("pct").oninput = syncPax;
+    document.getElementById("manual").onchange = e=>{
+      document.getElementById("manualBox").classList.toggle("oculto", !e.target.checked);
+      recalcular();
+    };
+    document.getElementById("pCuerpo").addEventListener("input", recalcular);
+    document.getElementById("pCuerpo").addEventListener("change", recalcular);
+    recalcular();
   }
   pintarCal();
 }
 function vistaLectura(e, f){
-  const evs = eventosDe(f);
+  const evs = eventosDe(f), alo = alojados(e.ev);
   return `<div class="kpis">
-      <div class="kpi"><b>${e.p!=null?e.p+"%":"—"}</b><span>ocupación${e.p!=null?" · "+habs(e.p)+" hab":""}</span></div>
+      <div class="kpi"><b>${e.p!=null?e.p+"%":"—"}</b><span>ocupación sobre ${PLAZAS} plazas</span></div>
       <div class="kpi"><b>${e.d??"—"}</b><span>duermen</span></div>
       <div class="kpi"><b>${e.b??"—"}</b><span>desayunan</span></div>
     </div>
-    ${e.e||e.td?`<div class="nota">Desayuno: ${esc(e.td||"—")}${e.e?" · "+esc(e.e):""}</div>`:""}
+    ${e.d!=null?`<div class="nota">${alo?`${e.pa??Math.max(0,e.d-alo)} particulares + ${alo} de eventos con alojamiento`:"Sin eventos con alojamiento"}${e.dm?" · total cargado a mano":""}</div>`:""}
+    ${e.e||e.td?`<div class="nota" style="margin-top:6px">Desayuno: ${esc(e.td||"—")}${e.e?" · "+esc(e.e):""}</div>`:""}
     <div class="sec-tit">Eventos y grupos del día</div>
     ${ evs.length ? evs.map(v=>`<div class="ev-item" style="${v.tipo==="est"?"border-left-color:var(--pizarra)":v.tipo==="egr"?"border-left-color:var(--laton)":""}">
-        <h4>${esc(v.n||"Evento")}</h4>
-        <div class="meta">${[v.e,v.s,v.h,v.x?v.x+" pax":"", v.tipo==="est"?"Grupo estudiantil":v.tipo==="egr"?"Egreso":""].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div>
+        <h4>${esc(v.n||"Evento")}${v.a?' <span class="tag">con alojamiento</span>':""}</h4>
+        <div class="meta">${[v.e,v.s,v.h,v.x?v.x+" pax":"", v.tipo==="ev"&&!v.a?"sin alojamiento":"", v.tipo==="est"?"Grupo estudiantil":v.tipo==="egr"?"Egreso":""].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div>
         ${v.i?`<div class="info">${esc(v.i)}</div>`:""}
       </div>`).join("") : '<p class="sin">Sin eventos cargados para este día.</p>' }
     ${e.o?`<div class="sec-tit">Observaciones</div><p style="white-space:pre-wrap;font-size:13px">${esc(e.o)}</p>`:""}`;
 }
 function formEdicion(e, ayer){
-  return `<div class="f3">
-      <div class="campo"><label>Ocupación %</label><input id="pct" type="number" min="0" max="100" value="${e.p??""}"></div>
-      <div class="campo"><label>Duermen</label><input id="duer" type="number" min="0" value="${e.d??""}"></div>
+  const alo = alojados(e.ev);
+  const part = e.pa ?? (e.d!=null ? Math.max(0, e.d - alo) : "");
+  return `<div class="calculo" id="calc"></div>
+    <div class="f3">
+      <div class="campo"><label>Particulares que duermen</label><input id="part" type="number" min="0" value="${part}"></div>
+      <div class="campo"><label>De eventos</label><input id="aloIn" value="${alo}" disabled></div>
       <div class="campo"><label>Desayunan</label><input id="desa" type="number" min="0" value="${e.b ?? ayer.d ?? ""}"></div>
     </div>
+    <label class="check"><input type="checkbox" id="manual" ${e.dm?"checked":""}> Cargar el total a mano</label>
+    <div class="campo ${e.dm?"":"oculto"}" id="manualBox"><label>Total que duerme</label><input id="duer" type="number" min="0" value="${e.d??""}"></div>
     <div class="f2">
       <div class="campo"><label>Tipo de desayuno</label>
         <select id="td">${["","DB","DB Reduc","DB Estudiantil","DBR","PC","MAP"].map(o=>`<option ${o===(e.td||"")?"selected":""}>${o}</option>`).join("")}</select></div>
@@ -436,31 +519,52 @@ function filaEvento(v){
       <div class="campo"><label>Servicio</label><input class="e-s" value="${esc(v.s||"")}"></div>
     </div>
     <div class="f2">
-      <div class="campo"><label>Pax</label><input class="e-x" value="${esc(v.x||"")}"></div>
+      <div class="campo"><label>Pax</label><input class="e-x e-pax" type="number" min="0" value="${esc(v.x||"")}"></div>
       <div class="campo"><label>Hora</label><input class="e-h" value="${esc(v.h||"")}"></div>
     </div>
+    <label class="check"><input type="checkbox" class="e-a" ${v.a?"checked":""}> Con alojamiento (suma a la ocupación)</label>
     <div class="campo"><label>Información adicional</label><textarea class="e-i">${esc(v.i||"")}</textarea></div>
-    <button class="bt borrar mini" onclick="this.parentNode.remove()">Quitar evento</button>
+    <button class="bt borrar mini" onclick="this.closest('.ev-form').remove(); recalcular();">Quitar evento</button>
   </div>`;
 }
 function agregarEvento(){
   const c = document.createElement("div"); c.innerHTML = filaEvento({});
   document.getElementById("evs").appendChild(c.firstChild);
+  recalcular();
 }
-function syncPax(){
-  const p = parseInt(document.getElementById("pct").value,10);
-  if(!isNaN(p) && !document.getElementById("duer").value) document.getElementById("duer").value = Math.round(p*CAP_PAX/100);
+/** Vuelve a sacar la cuenta cada vez que se toca algo del formulario. */
+function recalcular(){
+  const caja = document.getElementById("calc"); if(!caja) return;
+  const alo = leerEventosForm().reduce((t,v)=> t + (v.a ? (parseInt(v.x,10)||0) : 0), 0);
+  document.getElementById("aloIn").value = alo;
+  const manual = document.getElementById("manual").checked;
+  const part = parseInt(document.getElementById("part").value,10) || 0;
+  const duermen = manual ? (parseInt(document.getElementById("duer").value,10)||0) : part + alo;
+  const pct = pctDe(duermen);
+  caja.innerHTML = `<div class="calc-n">${pct}%</div>
+    <div class="calc-t"><b>${duermen}</b> personas duermen sobre ${PLAZAS} plazas
+      <span>${manual ? "total cargado a mano" : part+" particulares + "+alo+" de eventos con alojamiento"}</span></div>`;
+  caja.classList.toggle("alto", pct>=95);
+}
+function leerEventosForm(){
+  return [...document.querySelectorAll("#evs .ev-form")].map(n=>{
+    const g = c => n.querySelector(c).value.trim();
+    return {n:g(".e-n"), e:g(".e-e"), s:g(".e-s"), x:g(".e-x"), h:g(".e-h"), i:g(".e-i"), a:n.querySelector(".e-a").checked};
+  }).filter(o=>o.n||o.s||o.i);
 }
 async function guardar(){
   const f = seleccion, e = d(f);
   const v = id => document.getElementById(id).value.trim();
   const antes = JSON.parse(JSON.stringify(e));
-  e.p = v("pct")===""?null:+v("pct"); e.d = v("duer")===""?null:+v("duer"); e.b = v("desa")===""?null:+v("desa");
+
+  e.ev = leerEventosForm();
+  const alo = alojados(e.ev);
+  e.dm = document.getElementById("manual").checked;
+  e.pa = v("part")===""?0:+v("part");
+  e.d  = e.dm ? (v("duer")===""?null:+v("duer")) : e.pa + alo;
+  e.p  = pctDe(e.d);
+  e.b  = v("desa")===""?null:+v("desa");
   e.td = v("td"); e.e = v("esp"); e.o = v("obs");
-  e.ev = [...document.querySelectorAll("#evs .ev-form")].map(n=>{
-    const g = c => n.querySelector(c).value.trim();
-    return {n:g(".e-n"), e:g(".e-e"), s:g(".e-s"), x:g(".e-x"), h:g(".e-h"), i:g(".e-i")};
-  }).filter(o=>o.n||o.s||o.i);
 
   const btn = document.getElementById("guardar");
   btn.disabled = true; btn.textContent = "Guardando…";
@@ -468,12 +572,14 @@ async function guardar(){
     const r = await fetch(API, {
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({ clave, fecha:f, dia:{p:e.p,d:e.d,b:e.b,td:e.td,e:e.e,o:e.o}, eventos:e.ev })
+      body: JSON.stringify({ clave, usuario, fecha:f,
+        dia:{d:e.d, b:e.b, td:e.td, e:e.e, o:e.o, pa:e.pa, dm:e.dm}, eventos:e.ev })
     });
     const j = await r.json();
     if(!j.ok) throw new Error(j.error||"No se pudo guardar");
-    marcarActualizado(j.actualizado);
-    cerrar(); pintarTodo(); toast("Guardado en la planilla");
+    cerrar();
+    await cargar(true);
+    toast("Guardado · ocupación " + (j.calculo ? j.calculo.pct+"%" : ""));
   }catch(err){
     Object.assign(e, antes);
     btn.disabled = false; btn.textContent = "Guardar cambios";
@@ -507,26 +613,47 @@ document.getElementById("irHoy").onclick = ()=>{ cursor = new Date(); pintarCal(
 document.getElementById("q").addEventListener("input", e=>{ filtro = e.target.value.trim().toLowerCase(); pintarTodo(); });
 document.querySelectorAll(".tab").forEach(t=>t.onclick = ()=>{
   document.querySelectorAll(".tab").forEach(o=>o.setAttribute("aria-selected", o===t));
-  ["cal","agenda","fichas","grupos"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
+  ["cal","agenda","fichas","grupos","hist"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
 });
-document.getElementById("modoBtn").onclick = async ()=>{
+document.getElementById("modoBtn").onclick = ()=>{
   if(edicion){ edicion=false; clave=""; aplicarModo(); toast("Volviste a solo visualización"); return; }
-  const p = prompt("Clave de gerencia para editar:");
-  if(p===null) return;
+  document.getElementById("inErr").textContent = "";
+  document.getElementById("inUsuario").value = usuario;
+  document.getElementById("inClave").value = "";
+  document.getElementById("ingreso").classList.remove("oculto");
+  document.getElementById("veloIngreso").classList.remove("oculto");
+  document.getElementById("inUsuario").focus();
+};
+function cerrarIngreso(){
+  document.getElementById("ingreso").classList.add("oculto");
+  document.getElementById("veloIngreso").classList.add("oculto");
+}
+document.getElementById("inCancelar").onclick = cerrarIngreso;
+document.getElementById("veloIngreso").onclick = cerrarIngreso;
+document.getElementById("inClave").addEventListener("keydown", e=>{ if(e.key==="Enter") entrar(); });
+document.getElementById("inEntrar").onclick = entrar;
+async function entrar(){
+  const n = document.getElementById("inUsuario").value.trim();
+  const p = document.getElementById("inClave").value;
+  const err = document.getElementById("inErr");
+  if(!n){ err.textContent = "Poné tu nombre"; return; }
+  err.textContent = "Verificando…";
   try{
     const r = await fetch(API+"?accion=clave&clave="+encodeURIComponent(p));
     const j = await r.json();
-    if(j.ok){ clave=p; edicion=true; aplicarModo(); toast("Modo edición activo"); }
-    else toast("Clave incorrecta");
-  }catch(err){ toast("No se pudo verificar la clave"); }
-};
+    if(!j.ok){ err.textContent = "Clave incorrecta"; return; }
+    usuario = n; clave = p; edicion = true;
+    cerrarIngreso(); aplicarModo(); toast("Modo edición · " + usuario);
+  }catch(e){ err.textContent = "No se pudo verificar la clave"; }
+}
 function aplicarModo(){
   document.getElementById("modoBox").classList.toggle("on", edicion);
-  document.getElementById("modoLbl").textContent = edicion ? "Modo edición · gerencia" : "Solo visualización";
+  document.getElementById("modoLbl").textContent = edicion ? "Editando · " + usuario : "Solo visualización";
   document.getElementById("modoBtn").textContent = edicion ? "Salir" : "Editar";
+  pintarHist();
   if(seleccion) abrirDia(seleccion);
 }
-function pintarTodo(){ pintarHoy(); pintarCal(); pintarAgenda(); pintarFichas(); pintarGrupos(); }
+function pintarTodo(){ pintarHoy(); pintarCal(); pintarAgenda(); pintarFichas(); pintarGrupos(); pintarHist(); }
 
 /* ---------------- carga desde la planilla ---------------- */
 function marcarActualizado(t){
@@ -540,6 +667,7 @@ async function cargar(silencioso){
     const j = await r.json();
     if(!j.ok) throw new Error(j.error||"respuesta inesperada");
     DATA = j;
+    if(j.config){ PLAZAS = j.config.plazas || PLAZAS; CAP_HAB = j.config.habitaciones || CAP_HAB; }
     Object.keys(dias).forEach(k=>delete dias[k]);
     DATA.dias.forEach(x=>dias[x.f]=x);
     pintarTodo();
