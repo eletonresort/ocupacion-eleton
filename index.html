@@ -726,15 +726,13 @@ function formEdicion(e, ayer){
 }
 function filaEvento(v){
   return `<div class="ev-item ev-form">
-    <div class="campo"><label>Evento</label>${combo("e-n","Eventos frecuentes",v.n)}</div>
     <div class="f2">
-      <div class="campo"><label>Espacio</label>${combo("e-e","Espacios",v.e)}</div>
-      <div class="campo"><label>Servicio</label>${combo("e-s","Servicios",v.s)}</div>
-    </div>
-    <div class="f2">
+      <div class="campo"><label>Hora</label><input class="e-h" value="${esc(v.h||"")}" placeholder="21:00 · 10:00 a 12:00"></div>
       <div class="campo"><label>Pax</label><input class="e-x e-pax" type="number" min="0" value="${esc(v.x||"")}"></div>
-      <div class="campo"><label>Hora</label><input class="e-h" value="${esc(v.h||"")}"></div>
     </div>
+    <div class="campo"><label>Evento / grupo</label>${combo("e-n","Eventos frecuentes",v.n)}</div>
+    <div class="campo"><label>Servicio / detalle</label>${combo("e-s","Servicios",v.s)}</div>
+    <div class="campo"><label>Espacio</label>${combo("e-e","Espacios",v.e)}</div>
     <label class="check"><input type="checkbox" class="e-a" ${v.a?"checked":""}> Con alojamiento (suma a la ocupación)</label>
     <div class="campo"><label>Información adicional</label><textarea class="e-i">${esc(v.i||"")}</textarea></div>
     <button class="bt borrar mini" onclick="this.closest('.ev-form').remove(); recalcular();">Quitar evento</button>
