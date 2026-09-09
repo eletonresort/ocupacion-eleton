@@ -119,6 +119,15 @@ button{cursor:pointer}
 .tl .ev b{display:block}
 .tl .ev span{font-size:12px;color:var(--tinta-2)}
 .tl .aloj{font-size:10px;font-weight:600;color:#fff;background:var(--verde);padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle}
+.tl.serv td{font-size:12.5px;padding:8px 12px 8px 0}
+.tl.serv td.gr{font-weight:700;color:var(--verde-osc);width:auto;white-space:normal}
+.tl.serv td.gr span{display:block;font-weight:400;color:var(--tinta-2);font-size:11.5px}
+.tl.serv td span{display:block;font-size:11.5px;color:var(--tinta-2)}
+.tl.serv th{padding-right:12px}
+.tl.serv td:last-child{width:auto}
+.tl.serv tr.notag td{font-size:11.5px;color:var(--tinta-2);padding-top:0;border-bottom:1px solid var(--linea)}
+.tl tr.gala td{background:#f6efe1}
+.gala-tag{font-size:10px;font-weight:700;color:#7d5a1f;background:#efe0c2;padding:1px 6px;border-radius:2px;margin-left:6px;vertical-align:middle}
 .tl tr.sinh td:first-child{color:var(--tinta-2);font-weight:400;font-style:italic}
 .ruta .obs{margin-top:16px;background:var(--papel);border-radius:var(--r);padding:12px 14px;font-size:12.5px;white-space:pre-wrap}
 .ruta-pie{margin-top:16px;display:flex;gap:8px}
@@ -194,6 +203,13 @@ button{cursor:pointer}
 .calc-t{font-size:12.5px;line-height:1.4}
 .calc-t b{font-size:15px}
 .calc-t span{display:block;color:rgba(255,255,255,.75);font-size:11.5px}
+.mini-tabla{width:100%;border-collapse:collapse;margin:4px 0 12px}
+.mini-tabla th{font-size:10px;letter-spacing:.06em;color:var(--tinta-2);text-align:left;padding:0 6px 4px 0;font-weight:700}
+.mini-tabla td{padding:0 6px 5px 0;font-size:12.5px}
+.mini-tabla td:first-child{color:var(--tinta-2);white-space:nowrap;width:100px}
+.mini-tabla input{width:100%;border:1px solid var(--linea);border-radius:var(--r);padding:5px 7px}
+.campo.destacado input{border:2px solid var(--verde-osc);font-size:17px;font-weight:700;padding:9px 10px}
+.campo.destacado label{color:var(--verde-osc)}
 .combo{display:flex;flex-direction:column;gap:5px}
 .combo select{width:100%;border:1px solid var(--linea);border-radius:var(--r);padding:7px 9px;background:#fff}
 .combo .combo-txt{width:100%;border:1px solid var(--verde);border-radius:var(--r);padding:7px 9px}
@@ -340,7 +356,7 @@ button{cursor:pointer}
 const API = "https://script.google.com/macros/s/AKfycbz4j8ahCMDq-b_RTq4TT5lnDPLm5cbHgE-nRXPpc56qc0oaI8ExfWmTGNdF_-bIxUlpog/exec";
 
 let PLAZAS = 375, CAP_HAB = 109;
-let DATA = { dias: [], fichas: [], estudiantil: {}, egresos: {} };
+let DATA = { dias: [], fichas: [], estudiantil: {}, egresos: {}, servicios: {} };
 let clave = "", usuario = "";
 const dias = {};
 const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -355,7 +371,7 @@ function d(f){ return dias[f] || (dias[f] = {f}); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 function habs(p){ return p==null ? null : Math.round(p*CAP_HAB/100); }
 function alojados(evs){ return (evs||[]).reduce((t,v)=> t + (v.a ? (parseInt(v.x,10)||0) : 0), 0); }
-function pctDe(duermen){ return duermen==null ? null : Math.round(duermen*100/PLAZAS); }
+function pctDe(hab){ return hab==null ? null : Math.round(hab*100/CAP_HAB); }
 /* Si la planilla todavía no tiene la hoja Listas, la app usa estas opciones
    para no quedarse en blanco. Cuando la hoja existe, manda la hoja. */
 const LISTAS_BASE = {
@@ -486,6 +502,18 @@ function minutos(txt){
   if(!m) return null;
   return (+m[1])*60 + (+m[2]);
 }
+function serviciosDe(f){ return (DATA.servicios && DATA.servicios[f]) || []; }
+/** Cada comida del plan se convierte en un renglón del cronograma. */
+function comidasComoEventos(f){
+  const out = [];
+  serviciosDe(f).forEach(g=>{
+    (g.comidas||[]).forEach(c=>{
+      out.push({ h:c.h, n:g.g+" · "+c.n, s:c.t||"", x:c.x==null?"":c.x, e:g.esp||"",
+                 tipo:"com", gala:c.gala });
+    });
+  });
+  return out;
+}
 function ordenarPorHora(evs){
   return evs.slice().sort((a,b)=>{
     const x = minutos(a.h), y = minutos(b.h);
@@ -518,7 +546,7 @@ function pintarSemana(){
       <div class="dow">${DOWC[i]}</div>
       <div class="n">${x.getDate()}</div>
       <div class="mm">${MES[x.getMonth()]}</div>
-      <div class="oc"><b>${e.p!=null?e.p+"%":"—"}</b>${e.d!=null?e.d+" duermen":"sin datos"}</div>
+      <div class="oc"><b>${e.p!=null?e.p+"%":"—"}</b>${e.hab!=null?e.hab+" hab · ":""}${e.d!=null?e.d+" duermen":"sin datos"}</div>
       ${evs.length?`<div class="cnt">${evs.length} ${evs.length===1?"evento":"eventos"}</div>`:""}
     </button>`;
   }
@@ -529,14 +557,33 @@ function pintarSemana(){
   pintarRuta();
 }
 
+/** La grilla de comidas por grupo, como la planilla de horarios de cocina. */
+function tablaServicios(serv){
+  const cols = ["Desayuno","Almuerzo","Merienda","Cena","Quinta comida"];
+  const celda = (g, nombre)=>{
+    const c = (g.comidas||[]).find(c=>c.n===nombre);
+    if(!c) return "—";
+    return `${c.x!=null?`<b>${c.x}</b>`:""}${c.h?`<span>${esc(c.h)}</span>`:""}${c.t?`<span class="${c.gala?"gala-tag":""}">${esc(c.t)}</span>`:""}` || "—";
+  };
+  return `<table class="tl serv">
+    <tr><th>GRUPO</th>${cols.map(c=>`<th>${c.toUpperCase()}</th>`).join("")}<th>ESPACIO</th></tr>
+    ${serv.map(g=>`<tr>
+      <td class="gr">${esc(g.g)}${g.x?`<span>${g.x} pax</span>`:""}</td>
+      ${cols.map(c=>`<td>${celda(g,c)}</td>`).join("")}
+      <td>${esc(g.esp||"—")}</td>
+    </tr>${(g.dietas||g.obs)?`<tr class="notag"><td colspan="7">${[g.dietas?"Dietas: "+esc(g.dietas):"", g.obs?esc(g.obs):""].filter(Boolean).join(" · ")}</td></tr>`:""}`).join("")}
+  </table>`;
+}
+
 /** El detalle del día, con el mismo orden que la hoja de ruta: hora, servicio, espacio. */
 function pintarRuta(){
   const f = diaSem, e = dias[f]||{}, x = fromISO(f);
-  const evs = ordenarPorHora(eventosDe(f));
+  const evs = ordenarPorHora(eventosDe(f).concat(comidasComoEventos(f)));
+  const serv = serviciosDe(f);
   const hosp = (e.ev||[]).filter(v=>v.a);
-  const filas = evs.map(v=>`<tr class="${v.h?"":"sinh"}">
+  const filas = evs.map(v=>`<tr class="${v.h?"":"sinh"} ${v.gala?"gala":""}">
       <td>${esc(v.h||"a coordinar")}</td>
-      <td class="ev"><b>${esc(v.n||"Evento")}${v.a?'<span class="aloj">alojamiento</span>':""}</b>
+      <td class="ev"><b>${esc(v.n||"Evento")}${v.a?'<span class="aloj">alojamiento</span>':""}${v.gala?'<span class="gala-tag">cena de gala</span>':""}</b>
         <span>${[v.s, v.x?v.x+" pax":"", v.tipo==="est"?"Grupo estudiantil":v.tipo==="egr"?"Egreso":""].filter(Boolean).map(esc).join(" · ")}</span>
         ${v.i?`<span>${esc(v.i)}</span>`:""}</td>
       <td>${esc(v.e||"—")}</td>
@@ -547,12 +594,14 @@ function pintarRuta(){
       <h3>${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}</h3>
       <div class="kk">
         <div><b>${e.p!=null?e.p+"%":"—"}</b>ocupación</div>
+        <div><b>${e.hab??"—"}</b>habitaciones</div>
         <div><b>${e.d??"—"}</b>duermen</div>
         <div><b>${e.b??"—"}</b>desayunan</div>
       </div>
     </div>
     ${hosp.length?`<h4>GRUPOS HOSPEDADOS</h4><div class="hosp">${hosp.map(v=>`<span><b>${esc(v.n)}</b>${v.x?" · "+esc(v.x)+" pax":""}</span>`).join("")}</div>`:""}
-    ${e.td||e.e?`<h4>DESAYUNO</h4><div class="hosp"><span>${esc(e.td||"—")}${e.e?" · "+esc(e.e):""}${e.b!=null?" · "+e.b+" pax":""}</span></div>`:""}
+    ${serv.length?`<h4>SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(serv)}`:""}
+    ${e.td||e.e?`<h4>DESAYUNO DE PARTICULARES</h4><div class="hosp"><span>${esc(e.td||"—")}${e.e?" · "+esc(e.e):""}${e.b!=null?" · "+e.b+" pax":""}</span></div>`:""}
     <h4>CRONOGRAMA DEL DÍA</h4>
     ${filas ? `<table class="tl"><tr><th>HORA</th><th>SERVICIO / DETALLE</th><th>ESPACIO</th></tr>${filas}</table>`
             : '<p class="sin">No hay eventos cargados para este día.</p>'}
@@ -677,6 +726,7 @@ function abrirDia(f){
     document.getElementById("guardar").onclick = guardar;
     document.getElementById("cancelar").onclick = cerrar;
     document.getElementById("addEv").onclick = ()=>{ agregarEvento(); };
+    document.getElementById("addServ").onclick = ()=>{ agregarServicio(); };
     document.getElementById("manual").onchange = e=>{
       document.getElementById("manualBox").classList.toggle("oculto", !e.target.checked);
       recalcular();
@@ -691,7 +741,7 @@ function abrirDia(f){
 function vistaLectura(e, f){
   const evs = eventosDe(f), alo = alojados(e.ev);
   return `<div class="kpis">
-      <div class="kpi"><b>${e.p!=null?e.p+"%":"—"}</b><span>ocupación sobre ${PLAZAS} plazas</span></div>
+      <div class="kpi"><b>${e.p!=null?e.p+"%":"—"}</b><span>${e.hab!=null?e.hab+" de "+CAP_HAB+" habitaciones":"ocupación"}</span></div>
       <div class="kpi"><b>${e.d??"—"}</b><span>duermen</span></div>
       <div class="kpi"><b>${e.b??"—"}</b><span>desayunan</span></div>
     </div>
@@ -709,6 +759,8 @@ function formEdicion(e, ayer){
   const alo = alojados(e.ev);
   const part = e.pa ?? (e.d!=null ? Math.max(0, e.d - alo) : "");
   return `<div class="calculo" id="calc"></div>
+    <div class="campo destacado"><label>Habitaciones ocupadas (de ${CAP_HAB})</label>
+      <input id="hab" type="number" min="0" max="${CAP_HAB}" value="${e.hab??""}" placeholder="0"></div>
     <div class="f3">
       <div class="campo"><label>Particulares que duermen</label><input id="part" type="number" min="0" value="${part}"></div>
       <div class="campo"><label>De eventos</label><input id="aloIn" value="${alo}" disabled></div>
@@ -722,6 +774,8 @@ function formEdicion(e, ayer){
     </div>
     <div class="sec-tit">Eventos del día <button class="bt sec mini" id="addEv" style="float:right;margin-top:-4px">+ Agregar</button></div>
     <div id="evs">${(e.ev||[]).map(filaEvento).join("")}</div>
+    <div class="sec-tit">Servicios gastronómicos <button class="bt sec mini" id="addServ" style="float:right;margin-top:-4px">+ Agregar grupo</button></div>
+    <div id="servs">${serviciosDe(e.f||seleccion).map(filaServicio).join("")}</div>
     <div class="campo" style="margin-top:14px"><label>Observaciones</label><textarea id="obs">${esc(e.o||"")}</textarea></div>`;
 }
 function filaEvento(v){
@@ -738,6 +792,56 @@ function filaEvento(v){
     <button class="bt borrar mini" onclick="this.closest('.ev-form').remove(); recalcular();">Quitar evento</button>
   </div>`;
 }
+const COMIDAS_APP = ["Desayuno","Almuerzo","Merienda","Cena","Quinta comida"];
+/** Una tarjeta por grupo, con una fila por comida: pax y horario. */
+function filaServicio(g){
+  g = g || { comidas: [] };
+  const dato = (nombre, campo)=>{
+    const c = (g.comidas||[]).find(x=>x.n===nombre);
+    return c ? (c[campo] ?? "") : "";
+  };
+  const tipoCena = dato("Cena","t");
+  return `<div class="ev-item serv-form">
+    <div class="f2">
+      <div class="campo"><label>Grupo / evento</label><input class="s-g" value="${esc(g.g||"")}"></div>
+      <div class="campo"><label>Pax total</label><input class="s-x" type="number" min="0" value="${esc(g.x??"")}"></div>
+    </div>
+    <table class="mini-tabla">
+      <tr><th></th><th>PAX</th><th>HORARIO</th></tr>
+      ${COMIDAS_APP.map(c=>`<tr data-comida="${c}">
+        <td>${c}</td>
+        <td><input class="c-x" type="number" min="0" value="${esc(dato(c,"x"))}"></td>
+        <td><input class="c-h" value="${esc(dato(c,"h"))}" placeholder="—"></td>
+      </tr>`).join("")}
+    </table>
+    <div class="campo"><label>Tipo de cena</label>${combo("s-t","Tipos de cena",tipoCena)}</div>
+    <div class="campo"><label>Espacio</label>${combo("s-e","Espacios",g.esp)}</div>
+    <div class="f2">
+      <div class="campo"><label>Dietas especiales</label><input class="s-d" value="${esc(g.dietas||"")}"></div>
+      <div class="campo"><label>Observaciones</label><input class="s-o" value="${esc(g.obs||"")}"></div>
+    </div>
+    <button class="bt borrar mini" onclick="this.closest('.serv-form').remove();">Quitar grupo</button>
+  </div>`;
+}
+function agregarServicio(){
+  const c = document.createElement("div"); c.innerHTML = filaServicio(null);
+  document.getElementById("servs").appendChild(c.firstChild);
+}
+function leerServiciosForm(){
+  return [...document.querySelectorAll("#servs .serv-form")].map(n=>{
+    const g = c => { const el = n.querySelector(c); return el ? el.value.trim() : ""; };
+    const tipoCena = g(".s-t");
+    const comidas = [...n.querySelectorAll("tr[data-comida]")].map(tr=>{
+      const nombre = tr.dataset.comida;
+      const x = tr.querySelector(".c-x").value.trim(), hh = tr.querySelector(".c-h").value.trim();
+      const t = nombre==="Cena" ? tipoCena : "";
+      if(!x && !hh && !t) return null;
+      return { n:nombre, x: x===""?null:+x, h:hh, t:t, gala: t.toUpperCase().includes("GALA") };
+    }).filter(Boolean);
+    return { g:g(".s-g"), x: g(".s-x")===""?null:+g(".s-x"), esp:g(".s-e"),
+             dietas:g(".s-d"), obs:g(".s-o"), comidas };
+  }).filter(o=>o.g || o.comidas.length);
+}
 function agregarEvento(){
   const c = document.createElement("div"); c.innerHTML = filaEvento({});
   document.getElementById("evs").appendChild(c.firstChild);
@@ -751,11 +855,13 @@ function recalcular(){
   const manual = document.getElementById("manual").checked;
   const part = parseInt(document.getElementById("part").value,10) || 0;
   const duermen = manual ? (parseInt(document.getElementById("duer").value,10)||0) : part + alo;
-  const pct = pctDe(duermen);
-  caja.innerHTML = `<div class="calc-n">${pct}%</div>
-    <div class="calc-t"><b>${duermen}</b> personas duermen sobre ${PLAZAS} plazas
-      <span>${manual ? "total cargado a mano" : part+" particulares + "+alo+" de eventos con alojamiento"}</span></div>`;
-  caja.classList.toggle("alto", pct>=95);
+  const habTxt = document.getElementById("hab").value;
+  const hab = habTxt==="" ? null : (parseInt(habTxt,10)||0);
+  const pct = pctDe(hab);
+  caja.innerHTML = `<div class="calc-n">${pct==null?"—":pct+"%"}</div>
+    <div class="calc-t"><b>${hab==null?"—":hab+" de "+CAP_HAB}</b> habitaciones ocupadas
+      <span>${duermen} personas duermen · ${manual ? "total cargado a mano" : part+" particulares + "+alo+" de eventos"}</span></div>`;
+  caja.classList.toggle("alto", pct!=null && pct>=95);
 }
 function leerEventosForm(){
   return [...document.querySelectorAll("#evs .ev-form")].map(n=>{
@@ -773,7 +879,8 @@ async function guardar(){
   e.dm = document.getElementById("manual").checked;
   e.pa = v("part")===""?0:+v("part");
   e.d  = e.dm ? (v("duer")===""?null:+v("duer")) : e.pa + alo;
-  e.p  = pctDe(e.d);
+  e.hab = v("hab")===""?null:+v("hab");
+  e.p  = pctDe(e.hab);
   e.b  = v("desa")===""?null:+v("desa");
   e.td = v("td"); e.e = v("esp"); e.o = v("obs");
 
@@ -784,7 +891,8 @@ async function guardar(){
       method:"POST",
       headers:{"Content-Type":"text/plain;charset=utf-8"},
       body: JSON.stringify({ clave, usuario, fecha:f,
-        dia:{d:e.d, b:e.b, td:e.td, e:e.e, o:e.o, pa:e.pa, dm:e.dm}, eventos:e.ev })
+        dia:{hab:e.hab, d:e.d, b:e.b, td:e.td, e:e.e, o:e.o, pa:e.pa, dm:e.dm},
+        eventos:e.ev, servicios:leerServiciosForm() })
     });
     const j = await r.json();
     if(!j.ok) throw new Error(j.error||"No se pudo guardar");
