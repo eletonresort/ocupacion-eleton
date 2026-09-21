@@ -261,6 +261,8 @@ button{cursor:pointer}
 .ocup td{padding:6px 8px 6px 0;border-bottom:1px solid var(--linea);vertical-align:top}
 .ocup .gala{color:#7d5a1f;font-weight:600}
 .chip.evt{border-left-color:var(--laton);color:#7d5a1f;background:#f6f0e4}
+.ruta-frame{width:100%;height:78vh;border:1px solid var(--linea);border-radius:var(--r);background:#fff}
+.ruta-vacio{background:#fff;border:1px dashed var(--linea);border-radius:var(--r);padding:40px 20px;text-align:center;color:var(--tinta-2)}
 .chip.fiesta{border-left-color:var(--pizarra);color:var(--pizarra);background:#eef1f4;font-style:italic}
 @media(max-width:760px){
   .grid,.dow{grid-template-columns:repeat(2,1fr)}
@@ -289,7 +291,8 @@ button{cursor:pointer}
     <button class="tab" data-vista="sem" aria-selected="true">Semana</button>
     <button class="tab" data-vista="cal" aria-selected="false">Mes</button>
     <button class="tab" data-vista="agenda" aria-selected="false">Agenda</button>
-    <button class="tab" data-vista="fichas" aria-selected="false">Fichas de eventos</button>
+    <button class="tab" data-vista="ruta" aria-selected="false">Hoja de ruta</button>
+    <button class="tab" data-vista="room" aria-selected="false">Rooming</button>
     <button class="tab" data-vista="grupos" aria-selected="false">Egresos</button>
     <button class="tab" data-vista="hist" aria-selected="false">Historial</button>
     <div class="buscar"><input id="q" type="search" placeholder="Buscar empresa, evento o colegio"></div>
@@ -330,9 +333,23 @@ button{cursor:pointer}
     <div class="agenda" id="agenda"></div>
   </section>
 
-  <section id="vista-fichas" class="oculto">
-    <div class="mes-bar"><h2 class="mes-tit">Fichas de eventos</h2></div>
-    <div class="fichas" id="fichas"></div>
+  <section id="vista-ruta" class="oculto">
+    <div class="mes-bar">
+      <h2 class="mes-tit">Hoja de ruta</h2>
+      <div class="resumen" id="rutaMeta"></div>
+    </div>
+    <div id="rutaSubir" class="oculto">
+      <label class="bt sec mini" style="display:inline-block;cursor:pointer">
+        Elegir PDF<input type="file" id="rutaArchivo" accept="application/pdf" class="oculto">
+      </label>
+      <span class="nota" id="rutaEstado" style="margin-left:8px"></span>
+    </div>
+    <div id="rutaVisor"></div>
+  </section>
+
+  <section id="vista-room" class="oculto">
+    <div class="mes-bar"><h2 class="mes-tit">Rooming</h2></div>
+    <p class="sin">Todavía no se cargó el archivo de rooming. En cuanto lo compartan, esta pestaña muestra la asignación de habitaciones para gobernanta y el resto de las áreas.</p>
   </section>
 
   <section id="vista-hist" class="oculto">
@@ -381,7 +398,7 @@ button{cursor:pointer}
 const API = "https://script.google.com/macros/s/AKfycbz4j8ahCMDq-b_RTq4TT5lnDPLm5cbHgE-nRXPpc56qc0oaI8ExfWmTGNdF_-bIxUlpog/exec";
 
 let CAPACIDAD = 350;
-let DATA = { dias: [], fichas: [], listas: {}, historial: [] };
+let DATA = { dias: [], listas: {}, historial: [], hojaRuta: null };
 let clave = "", usuario = "";
 const dias = {};
 const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -473,7 +490,7 @@ function comboCambio(nodo){
 /* ---------------- eventos combinados para chips y búsqueda ---------------- */
 function eventosDe(f){
   const e = dias[f] || {};
-  const l = (e.ev||[]).map(v=>({ n:v.n, x:v.x, a:v.a, i:v.i, tipo:"ev" }));
+  const l = [];
   (e.est||[]).forEach(g=> l.push({ n:g.empresa, x:g.du, tipo:"est" }));
   (e.evt||[]).forEach(g=> l.push({ n:g.empresa, x:g.du, a:g.aloj, tipo:"evt" }));
   (e.egr||[]).forEach(g=> l.push({ n:g.grupo||"Egreso", x:g.egresados, tipo:"egr" }));
@@ -486,8 +503,7 @@ function coincide(f){
     (e.part||{}).esp, (e.part||{}).tipo,
     ...(e.est||[]).map(g=>[g.empresa,g.servicio,g.dietas].join(" ")),
     ...(e.evt||[]).map(g=>g.empresa),
-    ...(e.egr||[]).map(g=>g.grupo),
-    ...(e.ev||[]).map(v=>[v.n,v.e,v.s,v.i].join(" "))
+    ...(e.egr||[]).map(g=>g.grupo)
   ];
   return txts.join(" ").toLowerCase().includes(filtro);
 }
@@ -624,7 +640,6 @@ function tablaServicios(serv){
 /** El detalle del día: combinado arriba, cada ocupación en su propio desplegable. */
 function pintarRuta(){
   const f = diaSem, e = d(f), t = e.tot, x = fromISO(f);
-  const evs = ordenarPorHora(eventosCronograma(f).concat(comidasComoEventos(f)));
 
   document.getElementById("semDet").innerHTML = `<div class="ruta">
     <div class="ruta-cab">
@@ -675,27 +690,13 @@ function pintarRuta(){
       </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
     </details>
 
-    ${e.serv.length?`<h4>SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:""}
-
-    <h4>CRONOGRAMA DEL DÍA</h4>
-    ${evs.length ? `<table class="tl">
-        <tr><th>HORA</th><th>SERVICIO / DETALLE</th><th>ESPACIO</th><th>PAX</th></tr>
-        ${evs.map(v=>`<tr class="${v.h?"":"sinh"} ${v.gala?"gala":""}">
-          <td>${esc(v.h||"a coordinar")}</td>
-          <td class="ev"><b>${esc(v.n||"Evento")}${v.a?'<span class="aloj">alojamiento</span>':""}${v.gala?'<span class="gala-tag">cena de gala</span>':""}</b>
-            <span>${[v.s, v.i].filter(Boolean).map(esc).join(" · ")}</span></td>
-          <td>${esc(v.e||"—")}</td>
-          <td>${v.x||"—"}</td>
-        </tr>`).join("")}
-      </table>`
-      : '<p class="sin">No hay eventos cargados para este día.</p>'}
+    ${e.serv.length?`<h4>SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:"<p class=\"sin\">Sin comidas cargadas para este día.</p>"}
 
     <div class="ruta-pie">
       <button class="bt sec mini" onclick="abrirDia('${f}')">${edicion?"Editar este día":"Ver ficha del día"}</button>
     </div>
   </div>`;
 }
-function eventosCronograma(f){ return (dias[f]?.ev||[]).map(v=>({...v})); }
 
 document.getElementById("semana").addEventListener("click", ev=>{
   const b = ev.target.closest(".sdia[data-f]");
@@ -704,36 +705,6 @@ document.getElementById("semana").addEventListener("click", ev=>{
 document.getElementById("semPrev").onclick = ()=>{ cursorSem = new Date(cursorSem.getTime()-7*864e5); diaSem = iso(cursorSem); pintarSemana(); };
 document.getElementById("semNext").onclick = ()=>{ cursorSem = new Date(cursorSem.getTime()+7*864e5); diaSem = iso(cursorSem); pintarSemana(); };
 document.getElementById("semHoy").onclick = ()=>{ cursorSem = lunesDe(new Date()); diaSem = hoyISO; pintarSemana(); };
-
-/* ---------------- fichas ---------------- */
-function campo(f, clave){ const c = f.campos.find(c=>c[0].toUpperCase().startsWith(clave)); return c ? c[1] : ""; }
-function recortar(t, n){ t = String(t).replace(/\s+/g," ").trim(); return t.length>n ? t.slice(0,n-1)+"…" : t; }
-function pintarFichas(){
-  const q = filtro;
-  document.getElementById("fichas").innerHTML = DATA.fichas.filter(f=>{
-    if(!q) return true;
-    return (f.evento+" "+f.fecha+" "+JSON.stringify(f.campos)+" "+JSON.stringify(f.desglose)).toLowerCase().includes(q);
-  }).map(f=>{
-    const pax = campo(f,"CANTIDAD"), esp = campo(f,"ESPACIOS"), alo = campo(f,"ALOJAMIENTO");
-    const resu = [
-      pax ? `<span><b>${esc(recortar(pax,50))}</b></span>` : "",
-      esp ? `<span>${esc(recortar(esp,60))}</span>` : "",
-      alo ? `<span>Alojamiento: ${esc(recortar(alo,40))}</span>` : ""
-    ].filter(Boolean).join("");
-    return `<details class="ficha" ${q?"open":""}>
-      <summary>
-        <h3>${esc(f.evento)}</h3>
-        <div class="fch">${esc(f.fecha)}</div>
-        ${resu?`<div class="resu">${resu}</div>`:""}
-        <div class="abrir">Ver detalle completo</div>
-      </summary>
-      <div class="todo">
-        <dl>${f.campos.map(c=>`<dt>${esc(c[0])}</dt><dd>${esc(c[1])}</dd>`).join("")}</dl>
-        ${f.desglose.length?`<div class="des">${f.desglose.map(x=>`<div class="d">${x[0]?`<b>${esc(corto(x[0])||x[0])}</b> · `:""}${esc(x[1])}</div>`).join("")}</div>`:""}
-      </div>
-    </details>`;
-  }).join("") || '<p class="sin">No hay fichas que coincidan.</p>';
-}
 
 /* ---------------- historial ---------------- */
 function pintarHist(){
@@ -763,6 +734,43 @@ async function deshacer(id){
   }catch(err){ toast("No se pudo deshacer: " + err.message); }
 }
 
+/* ---------------- hoja de ruta en PDF ---------------- */
+function pintarRutaPDF(){
+  const r = DATA.hojaRuta;
+  document.getElementById("rutaMeta").innerHTML = r
+    ? `<div class="k"><b>${esc(r.nombre)}</b><span>subida el ${esc(r.fecha)} por ${esc(r.usuario)}</span></div>`
+    : "";
+  document.getElementById("rutaVisor").innerHTML = r
+    ? `<iframe class="ruta-frame" src="${r.urlVer}"></iframe>`
+    : `<div class="ruta-vacio">Todavía no se subió ninguna hoja de ruta.${edicion?"":" Pasá a modo edición para subirla."}</div>`;
+  document.getElementById("rutaSubir").classList.toggle("oculto", !edicion);
+}
+async function subirRutaPdf(file){
+  const estado = document.getElementById("rutaEstado");
+  if(file.size > 15*1024*1024){ estado.textContent = "El PDF pesa más de 15 MB, es demasiado para subir."; return; }
+  estado.textContent = "Subiendo…";
+  try{
+    const b64 = await new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = ()=> res(String(r.result).split(",").pop());
+      r.onerror = ()=> rej(new Error("No se pudo leer el archivo"));
+      r.readAsDataURL(file);
+    });
+    const r = await fetch(API, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ clave, usuario, accion:"subirRuta", pdfBase64:b64, nombreArchivo:file.name }) });
+    const j = await r.json();
+    if(!j.ok) throw new Error(j.error||"No se pudo subir el archivo");
+    DATA.hojaRuta = j.hojaRuta;
+    estado.textContent = "";
+    pintarRutaPDF();
+    toast("Hoja de ruta actualizada");
+  }catch(err){ estado.textContent = "No se pudo subir: " + err.message; }
+}
+document.getElementById("rutaArchivo").addEventListener("change", e=>{
+  if(e.target.files[0]) subirRutaPdf(e.target.files[0]);
+  e.target.value = "";
+});
+
 /* ---------------- pestaña Egresos ---------------- */
 function pintarGrupos(){
   const filas = [];
@@ -779,7 +787,7 @@ function pintarGrupos(){
     }).join("") || '<tr><td colspan="6" class="sin">Sin egresos cargados</td></tr>');
 }
 
-function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarFichas(); pintarGrupos(); pintarHist(); }
+function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarGrupos(); pintarHist(); pintarRutaPDF(); }
 
 /* ---------------- carga desde la planilla ---------------- */
 function marcarActualizado(t){ document.getElementById("estado").textContent = t ? "Datos al "+t : ""; }
@@ -825,7 +833,6 @@ function abrirDia(f){
     document.getElementById("addEst").onclick = ()=> agregarTarjeta("est", filaEstudiantil);
     document.getElementById("addEvtOc").onclick = ()=> agregarTarjeta("evtoc", filaEventoOc);
     document.getElementById("addEgr").onclick = ()=> agregarTarjeta("egr", filaEgreso);
-    document.getElementById("addEv").onclick = ()=> agregarTarjeta("evs", filaEvento);
     document.getElementById("addServ").onclick = ()=> agregarTarjeta("servs", filaServicio);
     const cuerpo = document.getElementById("pCuerpo");
     cuerpo.addEventListener("change", ev=>{ comboCambio(ev.target); recalcular(); });
@@ -877,15 +884,7 @@ function vistaLectura(e){
       </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
     </details>
 
-    ${e.serv.length?`<h4 class="sec-tit" style="margin-top:18px">SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:""}
-
-    <h4 class="sec-tit">CRONOGRAMA DEL DÍA</h4>
-    ${ (()=>{ const evs = ordenarPorHora(eventosCronograma(e.f).concat(comidasComoEventos(e.f)));
-       return evs.length ? evs.map(v=>`<div class="ev-item" style="${v.tipo==="com"?"border-left-color:var(--laton)":""}">
-         <h4>${esc(v.n||"Evento")}${v.a?' <span class="tag">con alojamiento</span>':""}${v.gala?' <span class="gala-tag">cena de gala</span>':""}</h4>
-         <div class="meta">${[v.h, v.e, v.s, v.x?v.x+" pax":""].filter(Boolean).map(esc).join(" · ")||"&nbsp;"}</div>
-         ${v.i?`<div class="info">${esc(v.i)}</div>`:""}
-       </div>`).join("") : '<p class="sin">Sin eventos cargados para este día.</p>'; })() }`;
+    ${e.serv.length?`<h4 class="sec-tit" style="margin-top:18px">SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:'<p class="sin" style="margin-top:14px">Sin comidas cargadas para este día.</p>'}`;
 }
 
 function formEdicion(e){
@@ -911,9 +910,6 @@ function formEdicion(e){
 
     <div class="sec-tit">EGRESOS <button class="bt sec mini" id="addEgr" style="float:right;margin-top:-4px">+ Agregar registro</button></div>
     <div id="egr">${e.egr.map(filaEgreso).join("")}</div>
-
-    <div class="sec-tit">EVENTOS DEL DÍA (cronograma) <button class="bt sec mini" id="addEv" style="float:right;margin-top:-4px">+ Agregar</button></div>
-    <div id="evs">${e.ev.map(filaEvento).join("")}</div>
 
     <div class="sec-tit">SERVICIOS GASTRONÓMICOS <button class="bt sec mini" id="addServ" style="float:right;margin-top:-4px">+ Agregar grupo</button></div>
     <div id="servs">${e.serv.map(filaServicio).join("")}</div>`;
@@ -1006,29 +1002,6 @@ function leerEgresosForm(){
   }).filter(o=>o.grupo || o.egresados!=null || o.invitados!=null);
 }
 
-/* ---------------- tarjetas: cronograma (Eventos) ---------------- */
-function filaEvento(v){
-  v = v || {};
-  return `<div class="ev-item ev-form">
-    <div class="f2">
-      <div class="campo"><label>Hora</label><input class="e-h" value="${esc(v.h||"")}" placeholder="13:30 · 10:00 a 12:00"></div>
-      <div class="campo"><label>Pax</label><input class="e-x e-pax" type="number" min="0" value="${esc(v.x||"")}"></div>
-    </div>
-    <div class="campo"><label>Evento / grupo</label>${combo("e-n","Eventos frecuentes",v.n)}</div>
-    <div class="campo"><label>Servicio / detalle</label>${combo("e-s","Servicios",v.s)}</div>
-    <div class="campo"><label>Espacio</label>${combo("e-e","Espacios",v.e)}</div>
-    <label class="check"><input type="checkbox" class="e-a" ${v.a?"checked":""}> Con alojamiento</label>
-    <div class="campo"><label>Información adicional</label><textarea class="e-i">${esc(v.i||"")}</textarea></div>
-    <button class="bt borrar mini" onclick="this.closest('.ev-form').remove(); recalcular();">Quitar evento</button>
-  </div>`;
-}
-function leerEventosForm(){
-  return [...document.querySelectorAll("#evs .ev-form")].map(n=>{
-    const g = c => n.querySelector(c).value.trim();
-    return {n:g(".e-n"), e:g(".e-e"), s:g(".e-s"), x:g(".e-x"), h:g(".e-h"), i:g(".e-i"), a:n.querySelector(".e-a").checked};
-  }).filter(o=>o.n||o.s||o.i);
-}
-
 /* ---------------- tarjetas: Servicios gastronómicos ---------------- */
 const COMIDAS_APP = [
   { n:"Desayuno",      lista:"Tipos de desayuno" },
@@ -1113,7 +1086,6 @@ async function guardar(){
   const est = leerEstudiantilForm();
   const evt = leerEventosOcForm();
   const egr = leerEgresosForm();
-  const eventos = leerEventosForm();
   const servicios = leerServiciosForm();
 
   const btn = document.getElementById("guardar");
@@ -1121,7 +1093,7 @@ async function guardar(){
   try{
     const r = await fetch(API, {
       method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({ clave, usuario, fecha:f, part, est, evt, egr, eventos, servicios })
+      body: JSON.stringify({ clave, usuario, fecha:f, part, est, evt, egr, servicios })
     });
     const j = await r.json();
     if(!j.ok) throw new Error(j.error||"No se pudo guardar");
@@ -1162,7 +1134,7 @@ document.getElementById("irHoy").onclick = ()=>{ cursor = new Date(); pintarCal(
 document.getElementById("q").addEventListener("input", e=>{ filtro = e.target.value.trim().toLowerCase(); pintarTodo(); });
 document.querySelectorAll(".tab").forEach(t=>t.onclick = ()=>{
   document.querySelectorAll(".tab").forEach(o=>o.setAttribute("aria-selected", o===t));
-  ["sem","cal","agenda","fichas","grupos","hist"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
+  ["sem","cal","agenda","ruta","room","grupos","hist"].forEach(v=>document.getElementById("vista-"+v).classList.toggle("oculto", v!==t.dataset.vista));
 });
 
 document.getElementById("modoBtn").onclick = ()=>{
@@ -1201,6 +1173,7 @@ function aplicarModo(){
   document.getElementById("modoLbl").textContent = edicion ? "Editando · " + usuario : "Solo visualización";
   document.getElementById("modoBtn").textContent = edicion ? "Salir" : "Editar";
   pintarHist();
+  pintarRutaPDF();
   if(seleccion) abrirDia(seleccion);
 }
 
