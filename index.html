@@ -270,6 +270,74 @@ button{cursor:pointer}
   .ag-dia{grid-template-columns:1fr}
   .hoy{width:100%;margin-left:0}
 }
+
+/* ============ rediseño visual ============ */
+:root{--c-part:#138170;--c-est:#4a5a6a;--c-evt:#a8762c;--c-egr:#7a5c8e;--c-serv:#0d543f;--gala:#b8860b}
+.pill{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:999px;line-height:1.35;white-space:nowrap;color:#fff;background:var(--tinta-2)}
+.pill.gala{background:var(--gala)}
+.pill.egr{background:var(--c-egr)}
+.pill.est{background:var(--c-est)}
+.pill.evt{background:var(--c-evt)}
+.pill.part{background:var(--c-part)}
+.pills{display:flex;gap:4px;flex-wrap:wrap;position:relative;margin:3px 0 2px}
+.leyenda{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:0 0 12px;font-size:11.5px;color:var(--tinta-2)}
+.leyenda i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.grid{gap:5px}
+.dia{min-height:126px;padding:8px 9px}
+.dia .num{font-size:19px}
+.dia .pct{font-size:15px;font-weight:700;top:7px;right:9px}
+.dia .fill{opacity:.2}
+.dia.gala-dia{box-shadow:inset 0 3px 0 var(--gala)}
+.dia.egr-dia{box-shadow:inset 0 3px 0 var(--c-egr)}
+.dia.gala-dia.egr-dia{box-shadow:inset 0 3px 0 var(--gala), inset 0 6px 0 var(--c-egr)}
+.dia.hoy.gala-dia,.dia.hoy.egr-dia{box-shadow:inset 0 0 0 1px var(--verde-osc), inset 0 3px 0 var(--gala)}
+.chip{font-size:10px;padding:2px 6px}
+.chip.est{border-left-color:var(--c-est)}
+.chip.evt{border-left-color:var(--c-evt);color:#7d5a1f;background:#f6f0e4}
+.chip.egr{border-left-color:var(--c-egr);color:#5b4270;background:#f1ecf4}
+.semana{gap:10px}
+.sdia{min-height:158px;padding:14px 13px 12px}
+.sdia .n{font-size:46px}
+.sdia .oc b{font-size:24px}
+.sdia.gala-dia{border-top:4px solid var(--gala)}
+.sdia.egr-dia{border-top:4px solid var(--c-egr)}
+.sdia.sel .pill{outline:1px solid rgba(255,255,255,.7)}
+.ruta{padding:22px 26px}
+.sec-barra{display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px}
+.sec-barra span{font-size:11px;letter-spacing:.1em;color:var(--tinta-2);font-weight:700}
+.ocup{border:1px solid var(--linea);border-left:5px solid var(--linea);border-radius:var(--r);margin-bottom:9px;background:#fff}
+.ocup.c-part{border-left-color:var(--c-part)}
+.ocup.c-est{border-left-color:var(--c-est)}
+.ocup.c-evt{border-left-color:var(--c-evt)}
+.ocup.c-egr{border-left-color:var(--c-egr)}
+.ocup.c-serv{border-left-color:var(--c-serv)}
+.ocup[open]{border-color:var(--linea)}
+.ocup.c-part[open]{border-left-color:var(--c-part)}
+.ocup.c-est[open]{border-left-color:var(--c-est)}
+.ocup.c-evt[open]{border-left-color:var(--c-evt)}
+.ocup.c-egr[open]{border-left-color:var(--c-egr)}
+.ocup.c-serv[open]{border-left-color:var(--c-serv)}
+.ocup summary{padding:12px 16px}
+.ocup summary b{font-family:'Playfair Display',serif;font-weight:500;font-size:18px;color:var(--negro)}
+.ocup summary .resu-s{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.ocup summary .n{font-size:12px;color:var(--tinta-2)}
+.ocup summary::after{content:"▾";color:var(--tinta-2);margin-left:8px;transition:transform .15s}
+.ocup[open] summary::after{transform:rotate(180deg)}
+.ocup .cuerpo-ocup{padding:4px 16px 16px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.stat{background:var(--papel);border-radius:var(--r);padding:10px 14px;min-width:96px}
+.stat b{display:block;font-family:'Playfair Display',serif;font-size:26px;font-weight:500;line-height:1.05}
+.stat b.txt{font-family:Montserrat,sans-serif;font-size:14px;font-weight:600;padding:6px 0 4px}
+.stat span{font-size:10.5px;color:var(--tinta-2);text-transform:uppercase;letter-spacing:.05em}
+.ocup tr.gala td{background:#f8f0dc}
+.combi .k{flex:1;min-width:130px;border-radius:var(--r)}
+.combi .k:nth-child(1){background:var(--c-part)}
+.combi .k:nth-child(2){background:var(--c-est)}
+.combi .k:nth-child(3){background:var(--c-evt)}
+.combi .k.tot{background:var(--verde-osc)}
+.combi .k.tot b{font-size:32px}
+.ruta-cab .pill{margin-left:8px;vertical-align:middle}
+@media(max-width:760px){.ruta{padding:16px}.combi .k{min-width:45%}}
 </style>
 </head>
 <body>
@@ -323,6 +391,13 @@ button{cursor:pointer}
       </div>
       <h2 class="mes-tit" id="mesTit"></h2>
       <div class="resumen" id="mesKpis"></div>
+    </div>
+    <div class="leyenda">
+      <span><i style="background:var(--c-est)"></i>Estudiantil</span>
+      <span><i style="background:var(--c-evt)"></i>Evento</span>
+      <span><i style="background:var(--c-egr)"></i>Egreso</span>
+      <span><i style="background:var(--gala)"></i>Cena de gala</span>
+      <span><i style="background:var(--verde);opacity:.45"></i>El fondo verde sube con la ocupación</span>
     </div>
     <div class="dow"><div>LUN</div><div>MAR</div><div>MIÉ</div><div>JUE</div><div>VIE</div><div>SÁB</div><div>DOM</div></div>
     <div class="grid" id="grid"></div>
@@ -518,31 +593,47 @@ function pintarHoy(){
     <div class="k"><b>${eventosDe(hoyISO).length||"—"}</b><span>ítems hoy</span></div>`;
 }
 
-/* ---------------- calendario mensual ---------------- */
+/* ---------------- calendario mensual (vista global) ---------------- */
+function diaTieneGala(e){
+  return (e.est||[]).some(g=>g.gala) || (e.serv||[]).some(s=>(s.comidas||[]).some(c=>c.gala));
+}
+function pillsDia(e){
+  const p = [];
+  if(diaTieneGala(e)) p.push('<span class="pill gala">★ Gala</span>');
+  if((e.egr||[]).length) p.push('<span class="pill egr">Egreso</span>');
+  return p.join("");
+}
+function hayDatos(e){ return !!(e && (e.part || (e.tot && e.tot.total>0))); }
+
 function pintarCal(){
   const y = cursor.getFullYear(), m = cursor.getMonth();
   document.getElementById("mesTit").innerHTML = MES[m][0].toUpperCase()+MES[m].slice(1)+" <em>"+y+"</em>";
   const primero = new Date(y,m,1), offset = (primero.getDay()+6)%7, ult = new Date(y,m+1,0).getDate();
   let html = "";
   for(let i=0;i<offset;i++) html += '<div class="dia vacio"></div>';
-  let sumaP=0, nP=0, llenos=0, nEv=0;
+  let sumaP=0, nP=0, llenos=0, nGala=0, nEgr=0;
   for(let dd=1; dd<=ult; dd++){
     const f = iso(new Date(y,m,dd)), e = dias[f]||{}, t = e.tot||{}, evs = eventosDe(f);
-    if(t.pct!=null){ sumaP+=t.pct; nP++; if(t.pct>=95) llenos++; }
-    nEv += evs.length;
+    const datos = hayDatos(e), gala = diaTieneGala(e), egr = (e.egr||[]).length>0;
+    if(datos){ sumaP+=t.pct; nP++; if(t.pct>=95) llenos++; }
+    if(gala) nGala++;
+    if(egr) nEgr++;
     const vis = coincide(f);
     const cls = ["dia"];
     if(f===hoyISO) cls.push("hoy");
     if(f<hoyISO) cls.push("pasado");
-    if(t.pct>=95) cls.push("lleno");
+    if(datos && t.pct>=95) cls.push("lleno");
+    if(gala) cls.push("gala-dia");
+    if(egr) cls.push("egr-dia");
     if(f===seleccion) cls.push("sel");
-    const chips = evs.slice(0,2).map(v=>`<div class="chip ${v.tipo}${v.a?" aloj":""}" title="${v.a?"Con alojamiento":""}">${esc(v.n||"Evento")}</div>`).join("")
-      + (evs.length>2?`<div class="chip mas">+${evs.length-2} más</div>`:"");
+    const chips = evs.slice(0,3).map(v=>`<div class="chip ${v.tipo}${v.a?" aloj":""}" title="${esc(v.n||"")}">${esc(v.n||"Evento")}</div>`).join("")
+      + (evs.length>3?`<div class="chip mas">+${evs.length-3} más</div>`:"");
     html += `<button class="${cls.join(" ")}" data-f="${f}" style="${vis?"":"opacity:.25"}">
-      <div class="fill" style="height:${t.pct!=null?Math.min(100,t.pct):0}%"></div>
+      <div class="fill" style="height:${datos?Math.min(100,t.pct):0}%"></div>
       <div class="num">${dd}</div>
-      ${t.pct!=null?`<div class="pct">${t.pct}%</div>`:""}
-      <div class="pax">${t.total!=null?t.total+" duermen":"&nbsp;"}</div>
+      ${datos?`<div class="pct">${t.pct}%</div>`:""}
+      <div class="pax">${datos?t.total+" duermen":"&nbsp;"}</div>
+      <div class="pills">${pillsDia(e)}</div>
       <div class="chips">${chips}</div>
     </button>`;
   }
@@ -550,7 +641,8 @@ function pintarCal(){
   document.getElementById("mesKpis").innerHTML = `
     <div class="k"><b>${nP?Math.round(sumaP/nP)+"%":"—"}</b><span>ocupación promedio</span></div>
     <div class="k"><b>${llenos}</b><span>días al 95% o más</span></div>
-    <div class="k"><b>${nEv}</b><span>ítems cargados</span></div>`;
+    <div class="k"><b>${nGala}</b><span>cenas de gala</span></div>
+    <div class="k"><b>${nEgr}</b><span>días con egreso</span></div>`;
 }
 
 /* ---------------- agenda ---------------- */
@@ -582,29 +674,35 @@ function pintarSemana(){
     ? `${ini.getDate()} al ${fin.getDate()} de <em>${MES[fin.getMonth()]}</em>`
     : `${ini.getDate()} ${MES[ini.getMonth()].slice(0,3)} al ${fin.getDate()} ${MES[fin.getMonth()].slice(0,3)} <em>${fin.getFullYear()}</em>`;
 
-  let html = "", sum=0, n=0, nev=0;
+  let html = "", sum=0, n=0, nev=0, nGala=0;
   for(let i=0;i<7;i++){
     const f = iso(new Date(cursorSem.getTime()+i*864e5)), e = dias[f]||{}, t = e.tot||{}, evs = eventosDe(f);
-    if(t.pct!=null){ sum+=t.pct; n++; }
+    const datos = hayDatos(e), gala = diaTieneGala(e), egr = (e.egr||[]).length>0;
+    if(datos){ sum+=t.pct; n++; }
     nev += evs.length;
+    if(gala) nGala++;
     const x = fromISO(f);
     const cls = ["sdia"];
     if(f===hoyISO) cls.push("hoy");
     if(f===diaSem) cls.push("sel");
-    if(t.pct>=95) cls.push("lleno");
+    if(datos && t.pct>=95) cls.push("lleno");
+    if(gala) cls.push("gala-dia");
+    if(egr) cls.push("egr-dia");
     html += `<button class="${cls.join(" ")}" data-f="${f}">
-      <div class="fill" style="height:${t.pct!=null?Math.min(100,t.pct):0}%"></div>
+      <div class="fill" style="height:${datos?Math.min(100,t.pct):0}%"></div>
       <div class="dow">${DOWC[i]}</div>
       <div class="n">${x.getDate()}</div>
       <div class="mm">${MES[x.getMonth()]}</div>
-      <div class="oc"><b>${t.pct!=null?t.pct+"%":"—"}</b>${t.total!=null?t.total+" duermen":"sin datos"}</div>
-      ${evs.length?`<div class="cnt">${evs.length} ${evs.length===1?"ítem":"ítems"}</div>`:""}
+      <div class="pills">${pillsDia(e)}</div>
+      <div class="oc"><b>${datos?t.pct+"%":"—"}</b>${datos?t.total+" duermen":"sin datos"}</div>
+      ${evs.length?`<div class="cnt">${evs.length} ${evs.length===1?"grupo":"grupos"}</div>`:""}
     </button>`;
   }
   document.getElementById("semana").innerHTML = html;
   document.getElementById("semKpis").innerHTML = `
     <div class="k"><b>${n?Math.round(sum/n)+"%":"—"}</b><span>promedio de la semana</span></div>
-    <div class="k"><b>${nev}</b><span>ítems cargados</span></div>`;
+    <div class="k"><b>${nev}</b><span>grupos y eventos</span></div>
+    <div class="k"><b>${nGala}</b><span>cenas de gala</span></div>`;
   pintarRuta();
 }
 
@@ -637,61 +735,98 @@ function tablaServicios(serv){
   </table>`;
 }
 
-/** El detalle del día: combinado arriba, cada ocupación en su propio desplegable. */
-function pintarRuta(){
-  const f = diaSem, e = d(f), t = e.tot, x = fromISO(f);
+/** Alterna todas las secciones del día entre desplegadas y plegadas. */
+function toggleSecciones(btn){
+  const ds = [...btn.closest(".secciones").querySelectorAll("details.ocup")];
+  const todasAbiertas = ds.every(x=>x.open);
+  ds.forEach(x=>x.open = !todasAbiertas);
+  btn.textContent = todasAbiertas ? "Desplegar todo" : "Plegar todo";
+}
 
-  document.getElementById("semDet").innerHTML = `<div class="ruta">
-    <div class="ruta-cab">
-      <h3>${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}</h3>
-      <div class="kk">
-        <div><b>${t.pct}%</b>ocupación total</div>
-        <div><b>${t.total}</b>duermen en total</div>
-      </div>
-    </div>
+/** Cuerpo del día: cifras combinadas y una sección de color por cada hoja. */
+function seccionesHTML(e){
+  const t = e.tot, p = e.part, gala = diaTieneGala(e);
+  const filaHorarios = g => [["Desayuno",g.hd],["Almuerzo",g.ha],["Merienda",g.hm]]
+      .filter(x=>x[1]).map(x=>x[0]+" "+esc(x[1])).join(" · ") || "—";
 
-    <div class="combi">
+  const secPart = `<details class="ocup c-part" ${p?"open":""}>
+    <summary><b>Ocupación Particular</b><span class="resu-s">${p
+      ? `<span class="n">${p.ci??"—"} check in</span><span class="pill part">${t.duPart} duermen</span>`
+      : '<span class="n">sin datos</span>'}</span></summary>
+    <div class="cuerpo-ocup">${p ? `<div class="stats">
+        <div class="stat"><b>${p.ci??"—"}</b><span>Check in</span></div>
+        <div class="stat"><b>${t.duPart}</b><span>Duermen</span></div>
+        <div class="stat"><b>${p.de??"—"}</b><span>Desayunan</span></div>
+        <div class="stat"><b class="txt">${esc(p.tipo||"—")}</b><span>Tipo de desayuno</span></div>
+        <div class="stat"><b class="txt">${esc(p.esp||"—")}</b><span>Espacio</span></div>
+      </div>` : '<p class="sin">Sin datos cargados para este día.</p>'}</div>
+  </details>`;
+
+  const secEst = `<details class="ocup c-est" ${e.est.length?"open":""}>
+    <summary><b>Ocupación Estudiantil</b><span class="resu-s">${e.est.length
+      ? `<span class="n">${e.est.length} ${e.est.length===1?"grupo":"grupos"}</span>${e.est.some(g=>g.gala)?'<span class="pill gala">★ Gala</span>':""}<span class="pill est">${t.duEst} duermen</span>`
+      : '<span class="n">sin grupos</span>'}</span></summary>
+    <div class="cuerpo-ocup">${e.est.length ? `<table>
+      <tr><th>EMPRESA</th><th>CHECK IN</th><th>DESAYUNAN</th><th>DUERMEN</th><th>SERVICIO</th><th>HORARIOS</th><th>CENA</th><th>DIETAS</th></tr>
+      ${e.est.map(g=>`<tr class="${g.gala?"gala":""}"><td><b>${esc(g.empresa||"—")}</b></td><td>${g.ci??"—"}</td><td>${g.de??"—"}</td><td>${g.du??"—"}</td>
+        <td>${esc(g.servicio||"—")}</td><td>${filaHorarios(g)}</td>
+        <td>${esc(g.tipoCena||"—")}${g.hc?" · "+esc(g.hc):""}${g.gala?' <span class="gala-tag">gala</span>':""}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
+    </table>` : '<p class="sin">Sin grupos estudiantiles este día.</p>'}</div>
+  </details>`;
+
+  const secEvt = `<details class="ocup c-evt" ${e.evt.length?"open":""}>
+    <summary><b>Ocupación Eventos</b><span class="resu-s">${e.evt.length
+      ? `<span class="n">${e.evt.length} ${e.evt.length===1?"evento":"eventos"}</span><span class="pill evt">${t.duEvt} duermen con alojamiento</span>`
+      : '<span class="n">sin eventos</span>'}</span></summary>
+    <div class="cuerpo-ocup">${e.evt.length ? `<table>
+      <tr><th>EMPRESA</th><th>CHECK IN</th><th>DESAYUNAN</th><th>DUERMEN</th><th>ALOJAMIENTO</th></tr>
+      ${e.evt.map(g=>`<tr><td><b>${esc(g.empresa||"—")}</b></td><td>${g.ci??"—"}</td><td>${g.de??"—"}</td><td>${g.du??"—"}</td>
+        <td>${g.aloj?'<span class="pill evt">Con alojamiento · suma</span>':'<span class="n">Sin alojamiento</span>'}</td></tr>`).join("")}
+    </table>` : '<p class="sin">Sin eventos este día.</p>'}</div>
+  </details>`;
+
+  const secEgr = `<details class="ocup c-egr" ${e.egr.length?"open":""}>
+    <summary><b>Egresos</b><span class="resu-s">${e.egr.length
+      ? `<span class="n">${e.egr.length} ${e.egr.length===1?"registro":"registros"}</span><span class="pill egr">no duermen</span>`
+      : '<span class="n">sin egresos</span>'}</span></summary>
+    <div class="cuerpo-ocup">${e.egr.length ? `<table>
+      <tr><th>GRUPO / COLEGIO</th><th>CHECK IN</th><th>EGRESADOS</th><th>INVITADOS</th><th>DIETAS</th></tr>
+      ${e.egr.map(g=>`<tr><td><b>${esc(g.grupo||"—")}</b></td><td>${g.ci??"—"}</td><td>${g.egresados??"—"}</td><td>${g.invitados??"—"}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
+    </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
+  </details>`;
+
+  const secServ = `<details class="ocup c-serv" ${e.serv.length?"open":""}>
+    <summary><b>Servicios gastronómicos</b><span class="resu-s">${e.serv.length
+      ? `<span class="n">${e.serv.length} ${e.serv.length===1?"grupo":"grupos"}</span>${(e.serv.some(s=>(s.comidas||[]).some(c=>c.gala)))?'<span class="pill gala">★ Gala</span>':""}`
+      : '<span class="n">sin comidas cargadas</span>'}</span></summary>
+    <div class="cuerpo-ocup">${e.serv.length ? tablaServicios(e.serv) : '<p class="sin">Sin comidas cargadas para este día.</p>'}</div>
+  </details>`;
+
+  return `<div class="combi">
       <div class="k"><b>${t.duPart}</b><span>particulares</span></div>
       <div class="k"><b>${t.duEst}</b><span>estudiantil</span></div>
       <div class="k"><b>${t.duEvt}</b><span>eventos con alojamiento</span></div>
-      <div class="k tot"><b>${t.pct}%</b><span>ocupación total</span></div>
+      <div class="k tot"><b>${t.pct}%</b><span>ocupación · ${t.total} de ${CAPACIDAD}</span></div>
     </div>
+    <div class="secciones">
+      <div class="sec-barra"><span>DETALLE POR SECCIÓN</span>
+        <button class="bt sec mini" onclick="toggleSecciones(this)">Plegar todo</button></div>
+      ${secPart}${secEst}${secEvt}${secEgr}${secServ}
+    </div>`;
+}
 
-    <details class="ocup" ${e.part?"open":""}>
-      <summary><b>Ocupación Particular</b><span>${e.part? (e.part.ci??"—")+" check-in · "+t.duPart+" duermen" : "sin datos"}</span></summary>
-      <div class="cuerpo-ocup">${e.part ? `<table>
-        <tr><th>CHECK IN</th><th>DESAYUNAN</th><th>DUERMEN</th><th>ESPACIO</th><th>TIPO DE DESAYUNO</th></tr>
-        <tr><td>${e.part.ci??"—"}</td><td>${e.part.de??"—"}</td><td>${t.duPart}</td><td>${esc(e.part.esp||"—")}</td><td>${esc(e.part.tipo||"—")}</td></tr>
-      </table>` : '<p class="sin">Sin datos cargados.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.est.length?"open":""}>
-      <summary><b>Ocupación Estudiantil</b><span>${e.est.length? e.est.length+" grupo(s) · "+t.duEst+" duermen" : "sin grupos"}</span></summary>
-      <div class="cuerpo-ocup">${e.est.length ? `<table>
-        <tr><th>EMPRESA</th><th>CHECK IN</th><th>DUERMEN</th><th>SERVICIO</th><th>CENA</th><th>DIETAS</th></tr>
-        ${e.est.map(g=>`<tr class="${g.gala?"gala":""}"><td>${esc(g.empresa)}</td><td>${g.ci??"—"}</td><td>${g.du??"—"}</td><td>${esc(g.servicio||"—")}</td>
-          <td>${esc(g.tipoCena||"—")}${g.hc?" · "+esc(g.hc):""}${g.gala?' <span class="gala-tag">gala</span>':""}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin grupos estudiantiles este día.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.evt.length?"open":""}>
-      <summary><b>Ocupación Eventos</b><span>${e.evt.length? e.evt.length+" evento(s) · "+t.duEvt+" duermen con alojamiento" : "sin eventos"}</span></summary>
-      <div class="cuerpo-ocup">${e.evt.length ? `<table>
-        <tr><th>EMPRESA</th><th>CHECK IN</th><th>DUERMEN</th><th>ALOJAMIENTO</th></tr>
-        ${e.evt.map(g=>`<tr><td>${esc(g.empresa)}</td><td>${g.ci??"—"}</td><td>${g.du??"—"}</td><td>${g.aloj?'<span class="aloj-si">SI · suma al total</span>':"NO"}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin eventos este día.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.egr.length?"open":""}>
-      <summary><b>Egresos</b><span>${e.egr.length? e.egr.length+" registro(s) · no duermen" : "sin egresos"}</span></summary>
-      <div class="cuerpo-ocup">${e.egr.length ? `<table>
-        <tr><th>GRUPO / COLEGIO</th><th>CHECK IN</th><th>EGRESADOS</th><th>INVITADOS</th><th>DIETAS</th></tr>
-        ${e.egr.map(g=>`<tr><td>${esc(g.grupo||"—")}</td><td>${g.ci??"—"}</td><td>${g.egresados??"—"}</td><td>${g.invitados??"—"}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
-    </details>
-
-    ${e.serv.length?`<h4>SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:"<p class=\"sin\">Sin comidas cargadas para este día.</p>"}
-
+/** El detalle del día elegido en la vista semanal. */
+function pintarRuta(){
+  const f = diaSem, e = d(f), x = fromISO(f);
+  document.getElementById("semDet").innerHTML = `<div class="ruta">
+    <div class="ruta-cab">
+      <h3>${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}${pillsDia(e)}</h3>
+      <div class="kk">
+        <div><b>${hayDatos(e)?e.tot.pct+"%":"—"}</b>ocupación</div>
+        <div><b>${hayDatos(e)?e.tot.total:"—"}</b>duermen</div>
+      </div>
+    </div>
+    ${seccionesHTML(e)}
     <div class="ruta-pie">
       <button class="bt sec mini" onclick="abrirDia('${f}')">${edicion?"Editar este día":"Ver ficha del día"}</button>
     </div>
@@ -794,10 +929,16 @@ function marcarActualizado(t){ document.getElementById("estado").textContent = t
 async function cargar(silencioso){
   const est = document.getElementById("estado");
   if(!silencioso) est.textContent = "Cargando la planilla…";
+  const ctrl = new AbortController();
+  const corte = setTimeout(()=>ctrl.abort(), 60000);
   try{
-    const r = await fetch(API+"?accion=datos&t="+Date.now());
-    const j = await r.json();
+    const r = await fetch(API+"?accion=datos&t="+Date.now(), { signal: ctrl.signal });
+    const texto = await r.text();
+    let j;
+    try{ j = JSON.parse(texto); }
+    catch(e){ throw new Error("el script no devolvió datos. Revisá que la implementación esté publicada con acceso para cualquier usuario"); }
     if(!j.ok) throw new Error(j.error||"respuesta inesperada");
+    if(j.dias && j.dias.length && !j.dias[0].tot) throw new Error("el script publicado es una versión vieja: falta republicar con Nueva versión");
     DATA = j;
     if(j.config) CAPACIDAD = j.config.capacidad || CAPACIDAD;
     Object.keys(dias).forEach(k=>delete dias[k]);
@@ -807,8 +948,10 @@ async function cargar(silencioso){
   }catch(err){
     est.textContent = API.indexOf("PEGAR") === 0
       ? "Falta pegar la URL del script en la app"
-      : "No se pudo leer la planilla. Reintentá con Actualizar.";
-  }
+      : err.name==="AbortError"
+        ? "La planilla tardó demasiado en responder. Reintentá con Actualizar."
+        : "No se pudo leer la planilla: " + err.message;
+  }finally{ clearTimeout(corte); }
 }
 document.getElementById("recargar").onclick = ()=>cargar(false);
 setInterval(()=>{ if(!seleccion) cargar(true); }, 120000);
@@ -842,50 +985,7 @@ function abrirDia(f){
   pintarCal(); pintarSemana();
 }
 
-function vistaLectura(e){
-  const t = e.tot;
-  return `<div class="combi">
-      <div class="k"><b>${t.duPart}</b><span>particulares</span></div>
-      <div class="k"><b>${t.duEst}</b><span>estudiantil</span></div>
-      <div class="k"><b>${t.duEvt}</b><span>eventos con alojamiento</span></div>
-      <div class="k tot"><b>${t.pct}%</b><span>ocupación total</span></div>
-    </div>
-
-    <details class="ocup" ${e.part?"open":""}>
-      <summary><b>Ocupación Particular</b><span>${e.part? (e.part.ci??"—")+" check-in · "+t.duPart+" duermen" : "sin datos"}</span></summary>
-      <div class="cuerpo-ocup">${e.part ? `<table>
-        <tr><th>CHECK IN</th><th>DESAYUNAN</th><th>DUERMEN</th><th>ESPACIO</th><th>TIPO DE DESAYUNO</th></tr>
-        <tr><td>${e.part.ci??"—"}</td><td>${e.part.de??"—"}</td><td>${t.duPart}</td><td>${esc(e.part.esp||"—")}</td><td>${esc(e.part.tipo||"—")}</td></tr>
-      </table>` : '<p class="sin">Sin datos cargados.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.est.length?"open":""}>
-      <summary><b>Ocupación Estudiantil</b><span>${e.est.length? e.est.length+" grupo(s) · "+t.duEst+" duermen" : "sin grupos"}</span></summary>
-      <div class="cuerpo-ocup">${e.est.length ? `<table>
-        <tr><th>EMPRESA</th><th>CHECK IN</th><th>DUERMEN</th><th>SERVICIO</th><th>CENA</th><th>DIETAS</th></tr>
-        ${e.est.map(g=>`<tr class="${g.gala?"gala":""}"><td>${esc(g.empresa)}</td><td>${g.ci??"—"}</td><td>${g.du??"—"}</td><td>${esc(g.servicio||"—")}</td>
-          <td>${esc(g.tipoCena||"—")}${g.hc?" · "+esc(g.hc):""}${g.gala?' <span class="gala-tag">gala</span>':""}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin grupos estudiantiles este día.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.evt.length?"open":""}>
-      <summary><b>Ocupación Eventos</b><span>${e.evt.length? e.evt.length+" evento(s) · "+t.duEvt+" duermen con alojamiento" : "sin eventos"}</span></summary>
-      <div class="cuerpo-ocup">${e.evt.length ? `<table>
-        <tr><th>EMPRESA</th><th>CHECK IN</th><th>DUERMEN</th><th>ALOJAMIENTO</th></tr>
-        ${e.evt.map(g=>`<tr><td>${esc(g.empresa)}</td><td>${g.ci??"—"}</td><td>${g.du??"—"}</td><td>${g.aloj?'<span class="aloj-si">SI · suma al total</span>':"NO"}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin eventos este día.</p>'}</div>
-    </details>
-
-    <details class="ocup" ${e.egr.length?"open":""}>
-      <summary><b>Egresos</b><span>${e.egr.length? e.egr.length+" registro(s) · no duermen" : "sin egresos"}</span></summary>
-      <div class="cuerpo-ocup">${e.egr.length ? `<table>
-        <tr><th>GRUPO / COLEGIO</th><th>CHECK IN</th><th>EGRESADOS</th><th>INVITADOS</th><th>DIETAS</th></tr>
-        ${e.egr.map(g=>`<tr><td>${esc(g.grupo||"—")}</td><td>${g.ci??"—"}</td><td>${g.egresados??"—"}</td><td>${g.invitados??"—"}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
-      </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
-    </details>
-
-    ${e.serv.length?`<h4 class="sec-tit" style="margin-top:18px">SERVICIOS GASTRONÓMICOS</h4>${tablaServicios(e.serv)}`:'<p class="sin" style="margin-top:14px">Sin comidas cargadas para este día.</p>'}`;
-}
+function vistaLectura(e){ return seccionesHTML(e); }
 
 function formEdicion(e){
   const p = e.part || {};
