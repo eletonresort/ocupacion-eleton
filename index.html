@@ -338,6 +338,58 @@ button{cursor:pointer}
 .combi .k.tot b{font-size:32px}
 .ruta-cab .pill{margin-left:8px;vertical-align:middle}
 @media(max-width:760px){.ruta{padding:16px}.combi .k{min-width:45%}}
+
+/* ============ número global (hero) ============ */
+.hero{background:#fff;border-bottom:1px solid var(--linea)}
+.hero-in{max-width:1500px;margin:0 auto;padding:16px 20px;display:flex;gap:30px;align-items:center;flex-wrap:wrap}
+.ring{width:158px;height:158px;flex:none}
+.ring-n{font-family:'Playfair Display',serif;font-size:34px;font-weight:500;fill:var(--negro)}
+.ring-s{font-size:10.5px;fill:var(--tinta-2);font-family:Montserrat,sans-serif}
+.hero-info{min-width:230px}
+.hero-lbl{font-size:10.5px;letter-spacing:.12em;font-weight:700;color:var(--tinta-2);margin-bottom:8px;text-transform:uppercase}
+.hero-line{display:flex;align-items:center;gap:9px;font-size:13px;margin:4px 0}
+.hero-line i{width:11px;height:11px;border-radius:3px;flex:none}
+.hero-line b{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;min-width:34px}
+.hero-line span{color:var(--tinta-2)}
+.hero-extra{margin-top:9px;font-size:11.5px;color:var(--tinta-2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.hero-bars-wrap{flex:1;min-width:340px}
+.hero-bars{display:flex;gap:6px;align-items:flex-end}
+.bar{flex:1;min-width:22px;height:112px;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:0}
+.bar-pct{font-size:9.5px;font-weight:700;color:var(--tinta-2);height:12px}
+.bar-col{flex:1;width:100%;display:flex;align-items:flex-end;background:var(--papel);border-radius:2px;overflow:hidden}
+.bar-col i{display:block;width:100%;background:var(--verde);border-radius:2px 2px 0 0}
+.bar.lleno .bar-col i{background:var(--laton)}
+.bar-dot{width:6px;height:6px;border-radius:50%;background:transparent}
+.bar-dot.gala{background:var(--gala)}
+.bar-d{font-size:11px;color:var(--negro);line-height:1}
+.bar-w{font-size:8.5px;color:var(--tinta-2);line-height:1}
+.bar.hoy .bar-d{font-weight:800;color:var(--verde-osc)}
+.bar.hoy .bar-col{box-shadow:0 0 0 1.5px var(--verde-osc)}
+.bar:hover .bar-col{box-shadow:0 0 0 1.5px var(--verde)}
+@media(max-width:760px){.ring{width:130px;height:130px}.hero-bars-wrap{min-width:100%}}
+
+/* ============ rooming ============ */
+.fecha-in{border:1px solid var(--linea);border-radius:var(--r);padding:6px 9px;background:#fff}
+.room-sector{background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.room-sector header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.room-sector h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:500;margin:0}
+.room-sector header span{font-size:12px;color:var(--tinta-2)}
+.room-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:6px}
+.hab{position:relative;border-radius:var(--r);padding:7px 8px 6px;min-height:62px;color:#fff;display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.hab b{font-family:'Playfair Display',serif;font-size:19px;font-weight:500;line-height:1}
+.hab i{font-style:normal;font-size:10px;opacity:.85;position:absolute;top:7px;right:8px}
+.hab span{font-size:10.5px;line-height:1.2;margin-top:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hab em{position:absolute;bottom:5px;right:6px;font-size:8.5px;font-style:normal;font-weight:800;background:rgba(255,255,255,.9);color:var(--verde-osc);padding:0 4px;border-radius:2px}
+.hab.libre{background:#fff;color:var(--tinta-2);border:1px dashed #cfd7d1}
+.hab.libre em{background:var(--papel)}
+.hab.conf{outline:3px solid #c0392b;outline-offset:-3px}
+.hab.dim{opacity:.18}
+.room-leyenda{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.room-leyenda .g{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--linea);border-radius:999px;padding:4px 12px 4px 6px;font-size:12px}
+.room-leyenda .g i{width:14px;height:14px;border-radius:50%}
+.room-leyenda .g small{color:var(--tinta-2)}
+.room-aviso{background:#fbf3e2;border-left:4px solid var(--laton);padding:10px 14px;border-radius:var(--r);font-size:12.5px;margin-bottom:12px}
+.room-aviso.mal{background:#fbeceb;border-left-color:#c0392b}
 </style>
 </head>
 <body>
@@ -366,6 +418,8 @@ button{cursor:pointer}
     <div class="buscar"><input id="q" type="search" placeholder="Buscar empresa, evento o colegio"></div>
   </div>
 </div>
+
+<section class="hero" id="hero"></section>
 
 <div class="wrap">
   <section id="vista-sem">
@@ -423,8 +477,17 @@ button{cursor:pointer}
   </section>
 
   <section id="vista-room" class="oculto">
-    <div class="mes-bar"><h2 class="mes-tit">Rooming</h2></div>
-    <p class="sin">Todavía no se cargó el archivo de rooming. En cuanto lo compartan, esta pestaña muestra la asignación de habitaciones para gobernanta y el resto de las áreas.</p>
+    <div class="mes-bar">
+      <div class="nav">
+        <button id="roomPrev" aria-label="Día anterior">‹</button>
+        <button id="roomNext" aria-label="Día siguiente">›</button>
+        <button class="hoy-btn" id="roomHoy">Hoy</button>
+      </div>
+      <h2 class="mes-tit">Rooming</h2>
+      <input type="date" id="roomFecha" class="fecha-in">
+      <div class="resumen" id="roomKpis"></div>
+    </div>
+    <div id="roomCuerpo"></div>
   </section>
 
   <section id="vista-hist" class="oculto">
@@ -473,7 +536,7 @@ button{cursor:pointer}
 const API = "https://script.google.com/macros/s/AKfycbz4j8ahCMDq-b_RTq4TT5lnDPLm5cbHgE-nRXPpc56qc0oaI8ExfWmTGNdF_-bIxUlpog/exec";
 
 let CAPACIDAD = 350;
-let DATA = { dias: [], listas: {}, historial: [], hojaRuta: null };
+let DATA = { dias: [], listas: {}, historial: [], hojaRuta: null, rooming: null };
 let clave = "", usuario = "";
 const dias = {};
 const MES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -583,15 +646,64 @@ function coincide(f){
   return txts.join(" ").toLowerCase().includes(filtro);
 }
 
-/* ---------------- barra de hoy ---------------- */
-function pintarHoy(){
-  const e = dias[hoyISO]||{}, t = e.tot||{}, m = dias[iso(new Date(HOY.getTime()+864e5))]||{};
-  document.getElementById("hoyKpis").innerHTML = `
-    <div class="k"><b>${t.pct!=null?t.pct+"%":"—"}</b><span>ocupación hoy</span></div>
-    <div class="k"><b>${t.total??"—"}</b><span>duermen hoy</span></div>
-    <div class="k"><b>${(m.tot||{}).duPart ?? "—"}</b><span>desayunan mañana (particular)</span></div>
-    <div class="k"><b>${eventosDe(hoyISO).length||"—"}</b><span>ítems hoy</span></div>`;
+/* ---------------- número global: ocupación de hoy ---------------- */
+function irADia(f){
+  cursorSem = lunesDe(fromISO(f)); diaSem = f;
+  document.querySelector('.tab[data-vista="sem"]').click();
+  pintarSemana();
+  window.scrollTo({ top:0, behavior:"smooth" });
 }
+function pintarHoy(){
+  document.getElementById("hoyKpis").innerHTML = "";
+  const e = dias[hoyISO] || {}, datos = hayDatos(e);
+  const t = e.tot || { duPart:0, duEst:0, duEvt:0, total:0, pct:0 };
+  const C = 2*Math.PI*54, base = Math.max(CAPACIDAD, t.total||0);
+  let acum = 0;
+  const seg = (valor, color)=>{
+    const len = C*(valor/base);
+    const s = `<circle cx="70" cy="70" r="54" fill="none" stroke-width="16" style="stroke:${color}" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-acum}"/>`;
+    acum += len; return s;
+  };
+  const x = HOY;
+  const anillo = `<svg viewBox="0 0 140 140" class="ring" role="img" aria-label="Ocupación de hoy: ${datos?t.pct+"%":"sin datos"}">
+      <circle cx="70" cy="70" r="54" fill="none" stroke="#e7ece8" stroke-width="16"/>
+      <g transform="rotate(-90 70 70)">${datos?seg(t.duPart,"var(--c-part)")+seg(t.duEst,"var(--c-est)")+seg(t.duEvt,"var(--c-evt)"):""}</g>
+      <text x="70" y="70" text-anchor="middle" class="ring-n">${datos?t.pct+"%":"—"}</text>
+      <text x="70" y="90" text-anchor="middle" class="ring-s">${datos?t.total+" de "+CAPACIDAD:"sin datos hoy"}</text>
+    </svg>`;
+
+  // próximos 14 días
+  let suma=0, n=0, pico=null;
+  const barras = Array.from({length:14}, (_,i)=>{
+    const f = iso(new Date(HOY.getTime()+i*864e5)), d2 = dias[f]||{}, t2 = d2.tot||{}, dt = hayDatos(d2), xx = fromISO(f);
+    if(dt){ suma+=t2.pct; n++; if(!pico || t2.pct>pico.pct) pico = { pct:t2.pct, f }; }
+    const alto = dt ? Math.max(Math.min(100,t2.pct), 4) : 0;
+    return `<button class="bar ${f===hoyISO?"hoy":""} ${dt&&t2.pct>=95?"lleno":""}" data-f="${f}" title="${xx.getDate()} ${MES[xx.getMonth()]}: ${dt?t2.pct+"% · "+t2.total+" duermen":"sin datos"}">
+        <span class="bar-pct">${dt?t2.pct:""}</span>
+        <span class="bar-col"><i style="height:${alto}%"></i></span>
+        <span class="bar-dot ${diaTieneGala(d2)?"gala":""}"></span>
+        <span class="bar-d">${xx.getDate()}</span><span class="bar-w">${DOWC[(xx.getDay()+6)%7]}</span>
+      </button>`;
+  }).join("");
+
+  document.getElementById("hero").innerHTML = `<div class="hero-in">
+    ${anillo}
+    <div class="hero-info">
+      <div class="hero-lbl">Ocupación hoy · ${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}</div>
+      <div class="hero-line"><i style="background:var(--c-part)"></i><b>${t.duPart}</b><span>particulares</span></div>
+      <div class="hero-line"><i style="background:var(--c-est)"></i><b>${t.duEst}</b><span>estudiantil</span></div>
+      <div class="hero-line"><i style="background:var(--c-evt)"></i><b>${t.duEvt}</b><span>eventos con alojamiento</span></div>
+      <div class="hero-extra">${pillsDia(e)}</div>
+    </div>
+    <div class="hero-bars-wrap">
+      <div class="hero-lbl">Próximos 14 días${n?` · promedio ${Math.round(suma/n)}%`:""}${pico?` · pico ${pico.pct}% el ${corto(pico.f)}`:""}</div>
+      <div class="hero-bars" id="heroBars">${barras}</div>
+    </div>
+  </div>`;
+}
+document.getElementById("hero").addEventListener("click", ev=>{
+  const b = ev.target.closest(".bar[data-f]"); if(b) irADia(b.dataset.f);
+});
 
 /* ---------------- calendario mensual (vista global) ---------------- */
 function diaTieneGala(e){
@@ -906,6 +1018,78 @@ document.getElementById("rutaArchivo").addEventListener("change", e=>{
   e.target.value = "";
 });
 
+/* ---------------- rooming ---------------- */
+let roomFecha = hoyISO;
+const PALETA = ["#138170","#4a5a6a","#a8762c","#7a5c8e","#2f6f9f","#b0524a","#5f8a3c","#8a6d3b","#3d7a7a","#9a5a7a","#6b6f2e","#476a8f"];
+function pintarRooming(){
+  const R = DATA.rooming || { habitaciones:[], asignaciones:[] };
+  const cuerpo = document.getElementById("roomCuerpo");
+  document.getElementById("roomFecha").value = roomFecha;
+  if(!R.habitaciones.length){
+    document.getElementById("roomKpis").innerHTML = "";
+    cuerpo.innerHTML = '<p class="sin">Todavía no hay habitaciones cargadas. En la planilla, corré Ocupación app → Preparar planilla para crear la hoja Habitaciones.</p>';
+    return;
+  }
+  const nombres = [...new Set(R.asignaciones.map(a=>a.grupo))].sort();
+  const color = g => PALETA[nombres.indexOf(g) % PALETA.length];
+  const activas = R.asignaciones.filter(a=> a.desde<=roomFecha && roomFecha<=a.hasta);
+  const porHab = {};
+  activas.forEach(a=> a.habs.forEach(h=> (porHab[h] = porHab[h]||[]).push(a)));
+  const coincideG = a => !filtro || (a.grupo+" "+(a.obs||"")).toLowerCase().includes(filtro);
+
+  const ocupadas = R.habitaciones.filter(h=>porHab[h.hab]);
+  const conflictos = R.habitaciones.filter(h=>porHab[h.hab] && new Set(porHab[h.hab].map(a=>a.grupo)).size>1);
+  const plazas = ocupadas.reduce((t,h)=> t + (h.cap||0), 0);
+  document.getElementById("roomKpis").innerHTML = `
+    <div class="k"><b>${ocupadas.length}</b><span>de ${R.habitaciones.length} habitaciones</span></div>
+    <div class="k"><b>${R.habitaciones.length-ocupadas.length}</b><span>libres</span></div>
+    <div class="k"><b>${plazas}</b><span>plazas asignadas</span></div>`;
+
+  // grupos presentes ese día
+  const resumenG = {};
+  activas.forEach(a=>{ const r = resumenG[a.grupo] = resumenG[a.grupo] || { habs:new Set(), desde:a.desde, hasta:a.hasta, obs:a.obs };
+    a.habs.forEach(h=>r.habs.add(h)); if(a.desde<r.desde) r.desde=a.desde; if(a.hasta>r.hasta) r.hasta=a.hasta; });
+  const capDe = h => (R.habitaciones.find(x=>x.hab===h)||{}).cap || 0;
+  const leyenda = Object.keys(resumenG).sort().map(g=>{
+    const r = resumenG[g]; const pl = [...r.habs].reduce((t,h)=>t+capDe(h),0);
+    return `<div class="g"><i style="background:${color(g)}"></i><b>${esc(g)}</b><small>${r.habs.size} hab · ${pl} plazas · ${corto(r.desde)} al ${corto(r.hasta)}</small></div>`;
+  }).join("");
+
+  const avisos = [];
+  if(conflictos.length) avisos.push(`<div class="room-aviso mal"><b>Hay habitaciones asignadas a dos grupos a la vez:</b> ${conflictos.map(h=>esc(h.hab)+" ("+[...new Set(porHab[h.hab].map(a=>a.grupo))].map(esc).join(" / ")+")").join(" · ")}. Revisalo en la hoja Rooming.</div>`);
+  const desconocidas = R.asignaciones.filter(a=>a.desconocidas && a.desconocidas.length);
+  if(desconocidas.length) avisos.push(`<div class="room-aviso"><b>En la hoja Rooming hay habitaciones que no existen en el catálogo:</b> ${desconocidas.map(a=>esc(a.desconocidas.join(", "))+" ("+esc(a.grupo)+")").join(" · ")}.</div>`);
+  if(!R.asignaciones.length) avisos.push('<div class="room-aviso">Todavía no hay rooming cargado. Se completa en la hoja <b>Rooming</b> de la planilla, una fila por grupo.</div>');
+  else if(!activas.length) avisos.push('<div class="room-aviso">Ningún grupo tiene habitaciones asignadas en esta fecha.</div>');
+
+  const orden = ["S.S","P.B","P.P","U","S.P"];
+  const sectores = orden.filter(s=>R.habitaciones.some(h=>h.sector===s))
+    .concat([...new Set(R.habitaciones.map(h=>h.sector))].filter(s=>!orden.includes(s)));
+
+  const bloques = sectores.map(s=>{
+    const hs = R.habitaciones.filter(h=>h.sector===s);
+    const oc = hs.filter(h=>porHab[h.hab]), pl = oc.reduce((t,h)=>t+(h.cap||0),0);
+    const tiles = hs.map(h=>{
+      const asg = porHab[h.hab] || [], gr = [...new Set(asg.map(a=>a.grupo))], libre = !gr.length;
+      const dim = filtro && !libre && !asg.some(coincideG);
+      const mr = /movilidad/i.test(h.nota||"");
+      return `<div class="hab ${libre?"libre":""} ${gr.length>1?"conf":""} ${dim?"dim":""}" ${libre?"":`style="background:${color(gr[0])}"`}
+          title="Hab. ${esc(h.hab)}${h.cap?" · x"+h.cap:""}${gr.length?" · "+esc(gr.join(" / ")):" · libre"}${asg[0]&&asg[0].obs?" · "+esc(asg[0].obs):""}">
+        <b>${esc(h.hab)}</b>${h.cap?`<i>x${h.cap}</i>`:""}
+        ${libre?"":`<span>${esc(gr[0])}${gr.length>1?" +"+(gr.length-1):""}</span>`}
+        ${mr?"<em>MR</em>":""}
+      </div>`;
+    }).join("");
+    return `<div class="room-sector"><header><h3>${esc(s)}</h3><span>${oc.length} de ${hs.length} ocupadas · ${pl} plazas</span></header><div class="room-grid">${tiles}</div></div>`;
+  }).join("");
+
+  cuerpo.innerHTML = avisos.join("") + (leyenda?`<div class="room-leyenda">${leyenda}</div>`:"") + bloques;
+}
+document.getElementById("roomFecha").addEventListener("change", e=>{ if(e.target.value){ roomFecha = e.target.value; pintarRooming(); } });
+document.getElementById("roomPrev").onclick = ()=>{ roomFecha = iso(new Date(fromISO(roomFecha).getTime()-864e5)); pintarRooming(); };
+document.getElementById("roomNext").onclick = ()=>{ roomFecha = iso(new Date(fromISO(roomFecha).getTime()+864e5)); pintarRooming(); };
+document.getElementById("roomHoy").onclick = ()=>{ roomFecha = hoyISO; pintarRooming(); };
+
 /* ---------------- pestaña Egresos ---------------- */
 function pintarGrupos(){
   const filas = [];
@@ -922,7 +1106,7 @@ function pintarGrupos(){
     }).join("") || '<tr><td colspan="6" class="sin">Sin egresos cargados</td></tr>');
 }
 
-function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarGrupos(); pintarHist(); pintarRutaPDF(); }
+function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarRooming(); pintarGrupos(); pintarHist(); pintarRutaPDF(); }
 
 /* ---------------- carga desde la planilla ---------------- */
 function marcarActualizado(t){ document.getElementById("estado").textContent = t ? "Datos al "+t : ""; }
