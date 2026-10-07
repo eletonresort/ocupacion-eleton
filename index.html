@@ -390,6 +390,48 @@ button{cursor:pointer}
 .room-leyenda .g small{color:var(--tinta-2)}
 .room-aviso{background:#fbf3e2;border-left:4px solid var(--laton);padding:10px 14px;border-radius:var(--r);font-size:12.5px;margin-bottom:12px}
 .room-aviso.mal{background:#fbeceb;border-left-color:#c0392b}
+
+/* ===== arreglo: el texto de las etiquetas dentro de los resúmenes quedaba gris sobre fondo de color ===== */
+.ocup summary span.pill{color:#fff}
+
+/* ===== rooming con el diseño del PDF ===== */
+.room-chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.room-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--linea);border-radius:999px;padding:7px 14px 7px 10px;font-size:12.5px;font-weight:600;color:var(--negro)}
+.room-chip i{width:12px;height:12px;border-radius:50%;background:var(--verde-osc);flex:none}
+.room-chip small{font-weight:500;color:var(--tinta-2)}
+.room-chip[aria-pressed="true"]{background:var(--verde-osc);border-color:var(--verde-osc);color:#fff}
+.room-chip[aria-pressed="true"] small{color:rgba(255,255,255,.75)}
+.room-chip[aria-pressed="true"] i{box-shadow:0 0 0 2px #fff}
+.room-titulo{font-family:'Playfair Display',serif;font-size:22px;margin:4px 0 10px;font-weight:500}
+.pdf-wrap{overflow-x:auto;margin-bottom:22px;background:#fff;border:1px solid var(--linea);border-radius:var(--r);padding:16px}
+.pdf-room{border-collapse:separate;border-spacing:0;font-family:Arial,Helvetica,sans-serif;font-size:12.5px;color:#111}
+.pdf-room td,.pdf-room th{height:25px;padding:2px 8px;white-space:nowrap}
+.pdf-room .sep{width:14px;border:0;background:transparent;padding:0}
+.pdf-room th{background:#dce9f6;font-weight:700;text-align:center;border:1px solid #111;border-right-width:0}
+.pdf-room th.fh{border-right-width:1px;min-width:190px}
+.pdf-room td{border:1px solid #111;border-right-width:0;border-top-width:0}
+.pdf-room td.fc{border-right-width:1px;min-width:190px;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.pdf-room td.hc{min-width:70px}
+.pdf-room td.gris{background:#d9d9d9}
+.pdf-room td.amarillo,.pdf-room td.nota-c{background:#fce5b0}
+.pdf-room td.nota-c{text-transform:capitalize}
+.pdf-room td.tot{font-size:11px;color:#444}
+.pdf-room td.fin{border-bottom-width:1px}
+.pdf-room td.vacio{border:0;background:transparent}
+.pdf-room td.ocu{color:#fff;font-weight:600}
+.pdf-room td.ocu small{display:block;font-weight:400;font-size:10.5px;opacity:.9;line-height:1.15}
+.pdf-room td.conf{outline:3px solid #c0392b;outline-offset:-3px}
+.pdf-room td.dim{opacity:.2}
+@media print{
+  body *{visibility:hidden}
+  #vista-room,#vista-room *{visibility:visible}
+  #vista-room{position:absolute;left:0;top:0;width:100%}
+  .no-print{display:none !important}
+  .pdf-wrap{border:0;padding:0;margin-bottom:10px;overflow:visible}
+  .pdf-room td.ocu{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pdf-room td.gris,.pdf-room td.amarillo,.pdf-room td.nota-c,.pdf-room th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.ruta-cab h3,.panel header h3{text-transform:none}
 </style>
 </head>
 <body>
@@ -478,15 +520,11 @@ button{cursor:pointer}
 
   <section id="vista-room" class="oculto">
     <div class="mes-bar">
-      <div class="nav">
-        <button id="roomPrev" aria-label="Día anterior">‹</button>
-        <button id="roomNext" aria-label="Día siguiente">›</button>
-        <button class="hoy-btn" id="roomHoy">Hoy</button>
-      </div>
       <h2 class="mes-tit">Rooming</h2>
-      <input type="date" id="roomFecha" class="fecha-in">
       <div class="resumen" id="roomKpis"></div>
+      <button class="bt sec mini no-print" id="roomImprimir" style="margin-left:auto">Imprimir</button>
     </div>
+    <div class="room-chips no-print" id="roomChips"></div>
     <div id="roomCuerpo"></div>
   </section>
 
@@ -550,6 +588,7 @@ function fromISO(s){ const [a,b,c]=s.split("-").map(Number); return new Date(a,b
 const hoyISO = iso(HOY);
 let cursorSem = lunesDe(new Date()), diaSem = hoyISO;
 
+function cap(s){ return s ? s[0].toUpperCase()+s.slice(1) : s; }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
 function corto(f){ if(!f) return ""; const x=fromISO(f); return x.getDate()+" "+MES[x.getMonth()].slice(0,3); }
 function d(f){
@@ -932,7 +971,7 @@ function pintarRuta(){
   const f = diaSem, e = d(f), x = fromISO(f);
   document.getElementById("semDet").innerHTML = `<div class="ruta">
     <div class="ruta-cab">
-      <h3>${DOW[x.getDay()]} ${x.getDate()} de ${MES[x.getMonth()]}${pillsDia(e)}</h3>
+      <h3>${cap(DOW[x.getDay()])} ${x.getDate()} de ${MES[x.getMonth()]}${pillsDia(e)}</h3>
       <div class="kk">
         <div><b>${hayDatos(e)?e.tot.pct+"%":"—"}</b>ocupación</div>
         <div><b>${hayDatos(e)?e.tot.total:"—"}</b>duermen</div>
@@ -1018,77 +1057,112 @@ document.getElementById("rutaArchivo").addEventListener("change", e=>{
   e.target.value = "";
 });
 
-/* ---------------- rooming ---------------- */
-let roomFecha = hoyISO;
+/* ---------------- rooming: MASTER y por empresa, con el diseño del PDF ---------------- */
+let roomVista = "master";
 const PALETA = ["#138170","#4a5a6a","#a8762c","#7a5c8e","#2f6f9f","#b0524a","#5f8a3c","#8a6d3b","#3d7a7a","#9a5a7a","#6b6f2e","#476a8f"];
+
+/** Cómo se acomodan las habitaciones: igual que en la plantilla en PDF. */
+function layoutRooming(habs){
+  const por = {};
+  habs.forEach(h=> (por[h.sector] = por[h.sector]||[]).push(h));
+  const bloques = [];
+  const b1 = ["S.S","P.B","P.P"].filter(s=>por[s]).map(s=>({ titulo:s, habs:por[s] }));
+  if(b1.length) bloques.push({ columnas:b1, totales:true });
+  const partir = (sector, tamanios)=>{
+    const l = por[sector]||[], cols = []; let i = 0;
+    tamanios.forEach((t,k)=>{ const fin = k===tamanios.length-1 ? l.length : i+t; cols.push({ titulo:sector, habs:l.slice(i,fin) }); i = fin; });
+    return cols;
+  };
+  if(por["U"])   bloques.push({ columnas:partir("U",[7,8,5]),   totales:false });
+  if(por["S.P"]) bloques.push({ columnas:partir("S.P",[9,9,9]), totales:false });
+  Object.keys(por).filter(s=>!["S.S","P.B","P.P","U","S.P"].includes(s))
+    .forEach(s=> bloques.push({ columnas:[{ titulo:s, habs:por[s] }], totales:false }));
+  return bloques;
+}
+const etiquetaHab = h => h.hab + (h.cap ? " X"+h.cap : "");
+
 function pintarRooming(){
-  const R = DATA.rooming || { habitaciones:[], asignaciones:[] };
+  const R = DATA.rooming || { habitaciones:[], roomings:[] };
   const cuerpo = document.getElementById("roomCuerpo");
-  document.getElementById("roomFecha").value = roomFecha;
   if(!R.habitaciones.length){
     document.getElementById("roomKpis").innerHTML = "";
-    cuerpo.innerHTML = '<p class="sin">Todavía no hay habitaciones cargadas. En la planilla, corré Ocupación app → Preparar planilla para crear la hoja Habitaciones.</p>';
+    document.getElementById("roomChips").innerHTML = "";
+    cuerpo.innerHTML = '<p class="sin">Todavía no hay habitaciones cargadas. En la planilla, corré Ocupación app → Preparar planilla.</p>';
     return;
   }
-  const nombres = [...new Set(R.asignaciones.map(a=>a.grupo))].sort();
-  const color = g => PALETA[nombres.indexOf(g) % PALETA.length];
-  const activas = R.asignaciones.filter(a=> a.desde<=roomFecha && roomFecha<=a.hasta);
-  const porHab = {};
-  activas.forEach(a=> a.habs.forEach(h=> (porHab[h] = porHab[h]||[]).push(a)));
-  const coincideG = a => !filtro || (a.grupo+" "+(a.obs||"")).toLowerCase().includes(filtro);
+  const empresas = R.roomings.map(r=>r.empresa);
+  if(roomVista !== "master" && !empresas.includes(roomVista)) roomVista = "master";
+  const color = e => PALETA[empresas.indexOf(e) % PALETA.length];
+  const capDe = hab => (R.habitaciones.find(h=>h.hab===hab)||{}).cap || 0;
 
-  const ocupadas = R.habitaciones.filter(h=>porHab[h.hab]);
-  const conflictos = R.habitaciones.filter(h=>porHab[h.hab] && new Set(porHab[h.hab].map(a=>a.grupo)).size>1);
-  const plazas = ocupadas.reduce((t,h)=> t + (h.cap||0), 0);
-  document.getElementById("roomKpis").innerHTML = `
-    <div class="k"><b>${ocupadas.length}</b><span>de ${R.habitaciones.length} habitaciones</span></div>
-    <div class="k"><b>${R.habitaciones.length-ocupadas.length}</b><span>libres</span></div>
-    <div class="k"><b>${plazas}</b><span>plazas asignadas</span></div>`;
+  // quién ocupa cada habitación
+  const ocup = {};
+  R.roomings.forEach(r=> Object.keys(r.habs).forEach(h=> (ocup[h] = ocup[h]||[]).push({ empresa:r.empresa, texto:r.habs[h] })));
+  const vista = roomVista==="master" ? ocup : (()=>{ const o = {}; Object.keys(ocup).forEach(h=>{ const m = ocup[h].filter(x=>x.empresa===roomVista); if(m.length) o[h]=m; }); return o; })();
+  const conflictos = Object.keys(ocup).filter(h=> new Set(ocup[h].map(x=>x.empresa)).size>1);
 
-  // grupos presentes ese día
-  const resumenG = {};
-  activas.forEach(a=>{ const r = resumenG[a.grupo] = resumenG[a.grupo] || { habs:new Set(), desde:a.desde, hasta:a.hasta, obs:a.obs };
-    a.habs.forEach(h=>r.habs.add(h)); if(a.desde<r.desde) r.desde=a.desde; if(a.hasta>r.hasta) r.hasta=a.hasta; });
-  const capDe = h => (R.habitaciones.find(x=>x.hab===h)||{}).cap || 0;
-  const leyenda = Object.keys(resumenG).sort().map(g=>{
-    const r = resumenG[g]; const pl = [...r.habs].reduce((t,h)=>t+capDe(h),0);
-    return `<div class="g"><i style="background:${color(g)}"></i><b>${esc(g)}</b><small>${r.habs.size} hab · ${pl} plazas · ${corto(r.desde)} al ${corto(r.hasta)}</small></div>`;
-  }).join("");
+  // selector: MASTER + una por empresa
+  const ocupadasTotal = Object.keys(ocup).length;
+  document.getElementById("roomChips").innerHTML =
+    `<button class="room-chip" data-v="master" aria-pressed="${roomVista==="master"}"><i></i>Rooming MASTER<small>${ocupadasTotal} hab</small></button>` +
+    R.roomings.map(r=>`<button class="room-chip" data-v="${esc(r.empresa)}" aria-pressed="${roomVista===r.empresa}"><i style="background:${color(r.empresa)}"></i>${esc(r.empresa)}<small>${r.total} hab</small></button>`).join("");
+
+  // cifras
+  const hs = Object.keys(vista), plazas = hs.reduce((t,h)=>t+capDe(h),0);
+  document.getElementById("roomKpis").innerHTML = roomVista==="master"
+    ? `<div class="k"><b>${hs.length}</b><span>de ${R.habitaciones.length} habitaciones</span></div>
+       <div class="k"><b>${R.habitaciones.length-hs.length}</b><span>libres</span></div>
+       <div class="k"><b>${plazas}</b><span>plazas · ${empresas.length} ${empresas.length===1?"rooming":"roomings"}</span></div>`
+    : `<div class="k"><b>${hs.length}</b><span>habitaciones</span></div>
+       <div class="k"><b>${plazas}</b><span>plazas</span></div>`;
 
   const avisos = [];
-  if(conflictos.length) avisos.push(`<div class="room-aviso mal"><b>Hay habitaciones asignadas a dos grupos a la vez:</b> ${conflictos.map(h=>esc(h.hab)+" ("+[...new Set(porHab[h.hab].map(a=>a.grupo))].map(esc).join(" / ")+")").join(" · ")}. Revisalo en la hoja Rooming.</div>`);
-  const desconocidas = R.asignaciones.filter(a=>a.desconocidas && a.desconocidas.length);
-  if(desconocidas.length) avisos.push(`<div class="room-aviso"><b>En la hoja Rooming hay habitaciones que no existen en el catálogo:</b> ${desconocidas.map(a=>esc(a.desconocidas.join(", "))+" ("+esc(a.grupo)+")").join(" · ")}.</div>`);
-  if(!R.asignaciones.length) avisos.push('<div class="room-aviso">Todavía no hay rooming cargado. Se completa en la hoja <b>Rooming</b> de la planilla, una fila por grupo.</div>');
-  else if(!activas.length) avisos.push('<div class="room-aviso">Ningún grupo tiene habitaciones asignadas en esta fecha.</div>');
+  if(roomVista==="master" && conflictos.length)
+    avisos.push(`<div class="room-aviso mal"><b>Hay habitaciones asignadas a dos empresas:</b> ${conflictos.map(h=>esc(h)+" ("+[...new Set(ocup[h].map(x=>x.empresa))].map(esc).join(" / ")+")").join(" · ")}. Se marcan en rojo.</div>`);
+  if(!R.roomings.length)
+    avisos.push('<div class="room-aviso">Todavía no hay ningún rooming cargado. En la planilla, duplicá la hoja <b>Rooming en blanco</b>, renombrala <b>Rooming + nombre de la empresa</b> (por ejemplo "Rooming Púrpura") y completá la celda de al lado de cada habitación.</div>');
 
-  const orden = ["S.S","P.B","P.P","U","S.P"];
-  const sectores = orden.filter(s=>R.habitaciones.some(h=>h.sector===s))
-    .concat([...new Set(R.habitaciones.map(h=>h.sector))].filter(s=>!orden.includes(s)));
-
-  const bloques = sectores.map(s=>{
-    const hs = R.habitaciones.filter(h=>h.sector===s);
-    const oc = hs.filter(h=>porHab[h.hab]), pl = oc.reduce((t,h)=>t+(h.cap||0),0);
-    const tiles = hs.map(h=>{
-      const asg = porHab[h.hab] || [], gr = [...new Set(asg.map(a=>a.grupo))], libre = !gr.length;
-      const dim = filtro && !libre && !asg.some(coincideG);
-      const mr = /movilidad/i.test(h.nota||"");
-      return `<div class="hab ${libre?"libre":""} ${gr.length>1?"conf":""} ${dim?"dim":""}" ${libre?"":`style="background:${color(gr[0])}"`}
-          title="Hab. ${esc(h.hab)}${h.cap?" · x"+h.cap:""}${gr.length?" · "+esc(gr.join(" / ")):" · libre"}${asg[0]&&asg[0].obs?" · "+esc(asg[0].obs):""}">
-        <b>${esc(h.hab)}</b>${h.cap?`<i>x${h.cap}</i>`:""}
-        ${libre?"":`<span>${esc(gr[0])}${gr.length>1?" +"+(gr.length-1):""}</span>`}
-        ${mr?"<em>MR</em>":""}
-      </div>`;
-    }).join("");
-    return `<div class="room-sector"><header><h3>${esc(s)}</h3><span>${oc.length} de ${hs.length} ocupadas · ${pl} plazas</span></header><div class="room-grid">${tiles}</div></div>`;
+  // tablas, una por bloque, con el diseño del PDF
+  const bloques = layoutRooming(R.habitaciones).map(b=>{
+    const cols = b.columnas.map(col=>{
+      const it = col.habs.map(h=>({ t:"hab", h }));
+      if(b.totales){
+        it.push({ t:"total", n: col.habs.filter(h=>vista[h.hab]).length });
+        col.habs.filter(h=>/amarillo/i.test(h.marca) && h.nota).forEach(h=> it.push({ t:"nota", texto:h.nota }));
+      }
+      return it;
+    });
+    const alto = Math.max(...cols.map(c=>c.length));
+    let filas = `<tr>${b.columnas.map((c,i)=>`${i?'<th class="sep" style="background:none;border:0"></th>':""}<th>HAB</th><th class="fh">${esc(c.titulo)}</th>`).join("")}</tr>`;
+    for(let r=0;r<alto;r++){
+      filas += "<tr>" + cols.map((c,i)=>{
+        const x = c[r], sep = i?'<td class="sep"></td>':"", ultimo = r===c.length-1 && x && x.t!=="total" && x.t!=="nota";
+        if(!x) return sep+'<td class="vacio"></td><td class="vacio"></td>';
+        if(x.t==="total") return sep+`<td class="hc tot fin">Total:</td><td class="fc tot fin">${x.n?x.n+" hab":""}</td>`;
+        if(x.t==="nota") return sep+`<td class="vacio"></td><td class="fc nota-c fin">${esc(x.texto)}</td>`;
+        const h = x.h, oc = vista[h.hab], fin = ultimo && !b.totales ? " fin" : "";
+        const marca = /gris|amarillo/i.test(h.marca) ? h.marca.toLowerCase() : "";
+        if(!oc) return sep+`<td class="hc ${marca}${fin}">${esc(etiquetaHab(h))}</td><td class="fc${fin}"></td>`;
+        const principal = oc[0], mismo = new Set(oc.map(o=>o.empresa)).size>1;
+        const dim = filtro && !oc.some(o=>(o.empresa+" "+o.texto).toLowerCase().includes(filtro));
+        const detalle = roomVista==="master"
+          ? (oc.map(o=>o.texto && o.texto!==o.empresa ? esc(o.texto) : "").filter(Boolean).join(" · "))
+          : "";
+        const titulo = roomVista==="master" ? oc.map(o=>esc(o.empresa)).join(" / ") : esc(principal.texto);
+        return sep+`<td class="hc ${marca}${fin}">${esc(etiquetaHab(h))}</td><td class="fc ocu ${mismo?"conf":""} ${dim?"dim":""}${fin}" style="background:${color(principal.empresa)}" title="${esc(oc.map(o=>o.empresa+(o.texto?": "+o.texto:"")).join(" | "))}">${titulo}${detalle?`<small>${detalle}</small>`:""}</td>`;
+      }).join("") + "</tr>";
+    }
+    return `<div class="pdf-wrap"><table class="pdf-room">${filas}</table></div>`;
   }).join("");
 
-  cuerpo.innerHTML = avisos.join("") + (leyenda?`<div class="room-leyenda">${leyenda}</div>`:"") + bloques;
+  const titulo = roomVista==="master" ? "Rooming MASTER · todas las empresas" : "Rooming · " + esc(roomVista);
+  cuerpo.innerHTML = avisos.join("") + `<div class="room-titulo">${titulo}</div>` + bloques;
 }
-document.getElementById("roomFecha").addEventListener("change", e=>{ if(e.target.value){ roomFecha = e.target.value; pintarRooming(); } });
-document.getElementById("roomPrev").onclick = ()=>{ roomFecha = iso(new Date(fromISO(roomFecha).getTime()-864e5)); pintarRooming(); };
-document.getElementById("roomNext").onclick = ()=>{ roomFecha = iso(new Date(fromISO(roomFecha).getTime()+864e5)); pintarRooming(); };
-document.getElementById("roomHoy").onclick = ()=>{ roomFecha = hoyISO; pintarRooming(); };
+document.getElementById("roomChips").addEventListener("click", ev=>{
+  const b = ev.target.closest(".room-chip[data-v]"); if(!b) return;
+  roomVista = b.dataset.v; pintarRooming();
+});
+document.getElementById("roomImprimir").onclick = ()=> window.print();
 
 /* ---------------- pestaña Egresos ---------------- */
 function pintarGrupos(){
@@ -1145,7 +1219,7 @@ setInterval(()=>{ if(!seleccion) cargar(true); }, 120000);
    ============================================================ */
 function abrirDia(f){
   seleccion = f; const e = d(f), x = fromISO(f);
-  document.getElementById("pTit").textContent = DOW[x.getDay()]+" "+x.getDate()+" de "+MES[x.getMonth()];
+  document.getElementById("pTit").textContent = cap(DOW[x.getDay()])+" "+x.getDate()+" de "+MES[x.getMonth()];
   document.getElementById("pSub").textContent = x.getFullYear();
   document.getElementById("pCuerpo").innerHTML = edicion ? formEdicion(e) : vistaLectura(e);
   document.getElementById("pPie").innerHTML = edicion
