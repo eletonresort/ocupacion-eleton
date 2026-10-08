@@ -938,11 +938,11 @@ function seccionesHTML(e){
 
   const secEgr = `<details class="ocup c-egr" ${e.egr.length?"open":""}>
     <summary><b>Egresos</b><span class="resu-s">${e.egr.length
-      ? `<span class="n">${e.egr.length} ${e.egr.length===1?"registro":"registros"}</span><span class="pill egr">no duermen</span>`
+      ? `<span class="n">${e.egr.length} ${e.egr.length===1?"registro":"registros"}</span><span class="pill egr">no duermen</span>${e.egr.some(g=>g.lobby)?'<span class="pill egr">Recepción en Lobby</span>':""}`
       : '<span class="n">sin egresos</span>'}</span></summary>
     <div class="cuerpo-ocup">${e.egr.length ? `<table>
-      <tr><th>GRUPO / COLEGIO</th><th>CHECK IN</th><th>EGRESADOS</th><th>INVITADOS</th><th>DIETAS</th></tr>
-      ${e.egr.map(g=>`<tr><td><b>${esc(g.grupo||"—")}</b></td><td>${g.ci??"—"}</td><td>${g.egresados??"—"}</td><td>${g.invitados??"—"}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
+      <tr><th>GRUPO / COLEGIO</th><th>CHECK IN</th><th>EGRESADOS</th><th>INVITADOS</th><th>RECEPCIÓN EN LOBBY</th><th>DIETAS</th></tr>
+      ${e.egr.map(g=>`<tr><td><b>${esc(g.grupo||"—")}</b></td><td>${g.ci??"—"}</td><td>${g.egresados??"—"}</td><td>${g.invitados??"—"}</td><td>${g.lobby?'<span class="pill egr">Sí · Lobby</span>':'<span class="n">No</span>'}</td><td>${esc(g.dietas||"—")}</td></tr>`).join("")}
     </table>` : '<p class="sin">Sin egresos este día.</p>'}</div>
   </details>`;
 
@@ -1174,10 +1174,10 @@ function pintarGrupos(){
     });
   });
   filas.sort((a,b)=> a.f<b.f ? 1 : -1);
-  document.getElementById("tEgr").innerHTML = `<tr><th>Fecha</th><th>Grupo / Colegio</th><th>Check in</th><th>Egresados</th><th>Invitados</th><th>Dietas</th></tr>` +
+  document.getElementById("tEgr").innerHTML = `<tr><th>Fecha</th><th>Grupo / Colegio</th><th>Check in</th><th>Egresados</th><th>Invitados</th><th>Recepción en Lobby</th><th>Dietas</th></tr>` +
     (filas.map(r=>{ const x = fromISO(r.f);
-      return `<tr><td>${x.getDate()} ${MES[x.getMonth()]} ${x.getFullYear()}</td><td>${esc(r.grupo||"—")}</td><td>${r.ci??"—"}</td><td>${r.egresados??"—"}</td><td>${r.invitados??"—"}</td><td>${esc(r.dietas||"—")}</td></tr>`;
-    }).join("") || '<tr><td colspan="6" class="sin">Sin egresos cargados</td></tr>');
+      return `<tr><td>${x.getDate()} ${MES[x.getMonth()]} ${x.getFullYear()}</td><td>${esc(r.grupo||"—")}</td><td>${r.ci??"—"}</td><td>${r.egresados??"—"}</td><td>${r.invitados??"—"}</td><td>${r.lobby?"Sí":"No"}</td><td>${esc(r.dietas||"—")}</td></tr>`;
+    }).join("") || '<tr><td colspan="7" class="sin">Sin egresos cargados</td></tr>');
 }
 
 function pintarTodo(){ pintarHoy(); pintarSemana(); pintarCal(); pintarAgenda(); pintarRooming(); pintarGrupos(); pintarHist(); pintarRutaPDF(); }
@@ -1348,6 +1348,8 @@ function filaEgreso(g){
       <div class="campo"><label>Invitados</label><input class="e-invitados" type="number" min="0" value="${g.invitados??""}"></div>
     </div>
     <div class="campo"><label>Dietas especiales</label><input class="e-dietas" value="${esc(g.dietas||"")}"></div>
+    <div class="campo"><label>Recepción en Lobby</label>
+      <select class="e-lobby"><option value="NO" ${g.lobby?"":"selected"}>NO</option><option value="SI" ${g.lobby?"selected":""}>SI</option></select></div>
     <button class="bt borrar mini" onclick="this.closest('.egr-form').remove();">Quitar registro</button>
   </div>`;
 }
@@ -1356,7 +1358,7 @@ function leerEgresosForm(){
     const g = c => { const el = n.querySelector(c); return el ? el.value.trim() : ""; };
     return { grupo:g(".e-grupo"), ci:g(".e-ci")===""?null:+g(".e-ci"),
              egresados:g(".e-egresados")===""?null:+g(".e-egresados"),
-             invitados:g(".e-invitados")===""?null:+g(".e-invitados"), dietas:g(".e-dietas") };
+             invitados:g(".e-invitados")===""?null:+g(".e-invitados"), dietas:g(".e-dietas"), lobby:g(".e-lobby")==="SI" };
   }).filter(o=>o.grupo || o.egresados!=null || o.invitados!=null);
 }
 
