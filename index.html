@@ -476,6 +476,36 @@ button{cursor:pointer}
 .zl.evt{border-left-color:var(--c-evt);background:#f8f2e6}
 .zl.egr{border-left-color:var(--c-egr);background:#f3eff6}
 @media (hover:none) and (pointer:coarse){.zoom{display:none}}
+
+/* ===== rooming: espacio de la derecha (estadía / guía de colores) ===== */
+.room-fila{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.room-fila > .pdf-room{flex:none}
+.room-lateral{flex:1;min-width:280px;max-width:440px}
+.rl-card{background:#fff;border:1px solid var(--linea);border-top:5px solid var(--c,var(--verde-osc));border-radius:var(--r);padding:16px 18px}
+.rl-titulo{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--tinta-2);font-weight:700;margin-bottom:6px}
+.rl-nombre{font-family:'Playfair Display',serif;font-size:24px;font-weight:500;line-height:1.15;margin:2px 0 12px}
+.rl-nombre .pill{vertical-align:middle;margin-left:6px}
+.rl-fechas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rl-fecha{background:var(--papel);border-radius:var(--r);padding:11px 13px}
+.rl-fecha span{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta-2);font-weight:700}
+.rl-fecha b{display:block;font-family:'Playfair Display',serif;font-size:30px;font-weight:500;line-height:1.05;margin-top:3px;text-transform:capitalize}
+.rl-fecha small{font-size:11.5px;color:var(--tinta-2)}
+.rl-fecha.vacia b{color:#b3bab5}
+.rl-meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:var(--tinta-2)}
+.rl-meta b{color:var(--negro);font-size:15px}
+.rl-hint{font-size:11.5px;color:var(--tinta-2);margin:12px 0 0}
+.rl-item{display:flex;align-items:flex-start;gap:11px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--linea);padding:11px 4px;cursor:pointer;border-radius:0}
+.rl-item:first-of-type{border-top:0}
+.rl-item:hover{background:var(--papel)}
+.rl-item > i{width:16px;height:16px;border-radius:4px;flex:none;margin-top:2px}
+.rl-item b{font-size:13.5px;margin-right:6px}
+.rl-item span{display:block;font-size:11.5px;color:var(--tinta-2);margin-top:2px}
+.rl-item span.pill{display:inline-block;color:#fff;margin:0 0 0 2px}
+.pill.casa{background:#2e7d4f}
+.pill.prox{background:var(--c-est)}
+.pill.fin{background:#8d948f}
+.mas-room{font-style:normal;font-size:10px;font-weight:700;background:rgba(255,255,255,.28);border-radius:999px;padding:0 6px;margin-left:4px}
+@media print{ .rl-item{break-inside:avoid} }
 </style>
 </head>
 <body>
@@ -1145,6 +1175,33 @@ function layoutRooming(habs){
 }
 const etiquetaHab = h => h.hab + (h.cap ? " X"+h.cap : "");
 
+/* ---- fechas de cada rooming ---- */
+function partesFecha(iso){ const x = fromISO(iso); return { dia:x.getDate(), mes:MES[x.getMonth()].slice(0,3), dow:cap(DOW[x.getDay()]), anio:x.getFullYear() }; }
+function fechaCorta(iso){ if(!iso) return ""; const p = partesFecha(iso); return p.dow.slice(0,3).toLowerCase()+" "+p.dia+" "+p.mes; }
+function nochesEntre(a,b){ return (a && b) ? Math.round((fromISO(b)-fromISO(a))/864e5) : null; }
+function estadoRooming(r){
+  if(!r.checkin && !r.checkout) return null;
+  if(r.checkout && r.checkout < hoyISO) return { t:"Finalizado", c:"fin" };
+  if(r.checkin && r.checkin > hoyISO) return { t:"Próximo", c:"prox" };
+  return { t:"En casa", c:"casa" };
+}
+const rangoRoom = o => [o.ci || "0000-00-00", o.co || "9999-99-99"];
+const seSolapan = (a,b) => { const x = rangoRoom(a), y = rangoRoom(b); return x[0] <= y[1] && y[0] <= x[1]; };
+/** Si dos roomings usan la misma habitación, hay conflicto solo cuando sus fechas se pisan (o falta alguna fecha). */
+function hayConflicto(oc){
+  for(let i=0;i<oc.length;i++) for(let j=i+1;j<oc.length;j++) if(oc[i].empresa!==oc[j].empresa && seSolapan(oc[i],oc[j])) return true;
+  return false;
+}
+/** Con varios ocupantes en fechas distintas, la celda muestra el que está hoy, o el próximo, o el último. */
+function ocupanteVigente(oc){
+  const hoyEn = oc.find(o=> rangoRoom(o)[0] <= hoyISO && hoyISO <= rangoRoom(o)[1]);
+  if(hoyEn) return hoyEn;
+  const prox = oc.filter(o=>o.ci && o.ci > hoyISO).sort((a,b)=>a.ci.localeCompare(b.ci))[0];
+  if(prox) return prox;
+  return oc.slice().sort((a,b)=>(b.co||"").localeCompare(a.co||""))[0];
+}
+const pillEstado = est => est ? `<span class="pill ${est.c}">${est.t}</span>` : "";
+
 function pintarRooming(){
   const R = DATA.rooming || { habitaciones:[], roomings:[] };
   const cuerpo = document.getElementById("roomCuerpo");
@@ -1158,18 +1215,19 @@ function pintarRooming(){
   if(roomVista !== "master" && !empresas.includes(roomVista)) roomVista = "master";
   const color = e => PALETA[empresas.indexOf(e) % PALETA.length];
   const capDe = hab => (R.habitaciones.find(h=>h.hab===hab)||{}).cap || 0;
+  const plazasDe = r => Object.keys(r.habs).reduce((t,h)=>t+capDe(h),0);
 
-  // quién ocupa cada habitación
+  // quién ocupa cada habitación (con las fechas de su rooming)
   const ocup = {};
-  R.roomings.forEach(r=> Object.keys(r.habs).forEach(h=> (ocup[h] = ocup[h]||[]).push({ empresa:r.empresa, texto:r.habs[h] })));
+  R.roomings.forEach(r=> Object.keys(r.habs).forEach(h=> (ocup[h] = ocup[h]||[]).push({ empresa:r.empresa, texto:r.habs[h], ci:r.checkin, co:r.checkout })));
   const vista = roomVista==="master" ? ocup : (()=>{ const o = {}; Object.keys(ocup).forEach(h=>{ const m = ocup[h].filter(x=>x.empresa===roomVista); if(m.length) o[h]=m; }); return o; })();
-  const conflictos = Object.keys(ocup).filter(h=> new Set(ocup[h].map(x=>x.empresa)).size>1);
+  const conflictos = Object.keys(ocup).filter(h=> hayConflicto(ocup[h]));
 
-  // selector: MASTER + una por empresa
-  const ocupadasTotal = Object.keys(ocup).length;
+  // selector: MASTER + una por empresa (con sus fechas)
+  const chipFechas = r => r.checkin ? ` · ${fechaCorta(r.checkin)} → ${r.checkout?fechaCorta(r.checkout):"?"}` : "";
   document.getElementById("roomChips").innerHTML =
-    `<button class="room-chip" data-v="master" aria-pressed="${roomVista==="master"}"><i></i>Rooming MASTER<small>${ocupadasTotal} hab</small></button>` +
-    R.roomings.map(r=>`<button class="room-chip" data-v="${esc(r.empresa)}" aria-pressed="${roomVista===r.empresa}"><i style="background:${color(r.empresa)}"></i>${esc(r.empresa)}<small>${r.total} hab</small></button>`).join("");
+    `<button class="room-chip" data-v="master" aria-pressed="${roomVista==="master"}"><i></i>Rooming MASTER<small>${Object.keys(ocup).length} hab</small></button>` +
+    R.roomings.map(r=>`<button class="room-chip" data-v="${esc(r.empresa)}" aria-pressed="${roomVista===r.empresa}"><i style="background:${color(r.empresa)}"></i>${esc(r.empresa)}<small>${r.total} hab${chipFechas(r)}</small></button>`).join("");
 
   // cifras
   const hs = Object.keys(vista), plazas = hs.reduce((t,h)=>t+capDe(h),0);
@@ -1182,12 +1240,46 @@ function pintarRooming(){
 
   const avisos = [];
   if(roomVista==="master" && conflictos.length)
-    avisos.push(`<div class="room-aviso mal"><b>Hay habitaciones asignadas a dos empresas:</b> ${conflictos.map(h=>esc(h)+" ("+[...new Set(ocup[h].map(x=>x.empresa))].map(esc).join(" / ")+")").join(" · ")}. Se marcan en rojo.</div>`);
+    avisos.push(`<div class="room-aviso mal"><b>Hay habitaciones asignadas a dos roomings con fechas que se pisan:</b> ${conflictos.map(h=>esc(h)+" ("+[...new Set(ocup[h].map(x=>x.empresa))].map(esc).join(" / ")+")").join(" · ")}. Se marcan en rojo.</div>`);
   if(!R.roomings.length)
-    avisos.push('<div class="room-aviso">Todavía no hay ningún rooming cargado. En la planilla, duplicá la hoja <b>Rooming en blanco</b>, renombrala <b>Rooming + nombre de la empresa</b> (por ejemplo "Rooming Púrpura") y completá la celda de al lado de cada habitación.</div>');
+    avisos.push('<div class="room-aviso">Todavía no hay ningún rooming cargado. En la planilla, duplicá la hoja <b>Rooming en blanco</b>, renombrala <b>Rooming + nombre de la empresa</b> (por ejemplo "Rooming Púrpura"), completá Check in y Check out, y la celda de al lado de cada habitación.</div>');
+
+  // espacio de la derecha: guía de colores (MASTER) o estadía del rooming (por empresa)
+  let lateral = "";
+  if(roomVista==="master" && R.roomings.length){
+    const orden = R.roomings.slice().sort((a,b)=> (a.checkin||"9999").localeCompare(b.checkin||"9999") || a.empresa.localeCompare(b.empresa));
+    lateral = `<aside class="room-lateral no-print-sin">
+      <div class="rl-card" style="--c:var(--verde-osc)">
+        <div class="rl-titulo">Guía de colores · ${orden.length} ${orden.length===1?"rooming":"roomings"}</div>
+        ${orden.map(r=>{
+          const n = nochesEntre(r.checkin, r.checkout), est = estadoRooming(r);
+          return `<button class="rl-item" data-v="${esc(r.empresa)}" title="Ver solo este rooming">
+            <i style="background:${color(r.empresa)}"></i>
+            <div><b>${esc(r.empresa)}</b>${pillEstado(est)}
+              <span>${r.checkin?esc(fechaCorta(r.checkin)):"sin check in"} → ${r.checkout?esc(fechaCorta(r.checkout)):"sin check out"}${n!=null?` · ${n} ${n===1?"noche":"noches"}`:""}</span>
+              <span>${r.total} hab · ${plazasDe(r)} plazas</span></div>
+          </button>`; }).join("")}
+        <p class="rl-hint">Tocá un rooming para ver solo el suyo.</p>
+      </div></aside>`;
+  } else if(roomVista!=="master"){
+    const r = R.roomings.find(x=>x.empresa===roomVista), est = estadoRooming(r), n = nochesEntre(r.checkin, r.checkout);
+    const caja = (rotulo, iso, txt) => {
+      if(iso){ const p = partesFecha(iso); return `<div class="rl-fecha"><span>${rotulo}</span><b>${p.dia} ${p.mes}</b><small>${p.dow} · ${p.anio}</small></div>`; }
+      return `<div class="rl-fecha vacia"><span>${rotulo}</span><b>—</b><small>${txt?esc(txt)+" (no es una fecha)":"sin cargar"}</small></div>`;
+    };
+    const faltan = !r.checkin || !r.checkout;
+    lateral = `<aside class="room-lateral">
+      <div class="rl-card" style="--c:${color(r.empresa)}">
+        <div class="rl-titulo">Estadía</div>
+        <div class="rl-nombre">${esc(r.empresa)} ${pillEstado(est)}</div>
+        <div class="rl-fechas">${caja("Check in", r.checkin, r.checkinTxt)}${caja("Check out", r.checkout, r.checkoutTxt)}</div>
+        <div class="rl-meta">${n!=null?`<span><b>${n}</b> ${n===1?"noche":"noches"}</span>`:""}<span><b>${r.total}</b> habitaciones</span><span><b>${plazasDe(r)}</b> plazas</span></div>
+        ${faltan?`<p class="rl-hint">Completá Check in y Check out en la hoja “${esc(r.hoja)}” (las dos celdas amarillas al lado de la tabla).</p>`:""}
+      </div></aside>`;
+  }
 
   // tablas, una por bloque, con el diseño del PDF
-  const bloques = layoutRooming(R.habitaciones).map(b=>{
+  const bloques = layoutRooming(R.habitaciones).map((b, bi)=>{
     const cols = b.columnas.map(col=>{
       const it = col.habs.map(h=>({ t:"hab", h }));
       if(b.totales){
@@ -1207,21 +1299,28 @@ function pintarRooming(){
         const h = x.h, oc = vista[h.hab], fin = ultimo && !b.totales ? " fin" : "";
         const marca = /gris|amarillo/i.test(h.marca) ? h.marca.toLowerCase() : "";
         if(!oc) return sep+`<td class="hc ${marca}${fin}">${esc(etiquetaHab(h))}</td><td class="fc${fin}"></td>`;
-        const principal = oc[0], mismo = new Set(oc.map(o=>o.empresa)).size>1;
+        const choque = hayConflicto(oc), principal = ocupanteVigente(oc), otros = oc.length-1;
         const dim = filtro && !oc.some(o=>(o.empresa+" "+o.texto).toLowerCase().includes(filtro));
         const detalle = roomVista==="master"
-          ? (oc.map(o=>o.texto && o.texto!==o.empresa ? esc(o.texto) : "").filter(Boolean).join(" · "))
+          ? (principal.texto && principal.texto!==principal.empresa ? esc(principal.texto) : "")
           : "";
-        const titulo = roomVista==="master" ? oc.map(o=>esc(o.empresa)).join(" / ") : esc(principal.texto);
-        return sep+`<td class="hc ${marca}${fin}">${esc(etiquetaHab(h))}</td><td class="fc ocu ${mismo?"conf":""} ${dim?"dim":""}${fin}" style="background:${color(principal.empresa)}" title="${esc(oc.map(o=>o.empresa+(o.texto?": "+o.texto:"")).join(" | "))}">${titulo}${detalle?`<small>${detalle}</small>`:""}</td>`;
+        const titulo = roomVista==="master" ? (choque ? oc.map(o=>esc(o.empresa)).join(" / ") : esc(principal.empresa)) : esc(principal.texto);
+        const mas = (roomVista==="master" && !choque && otros>0) ? ` <em class="mas-room">+${otros}</em>` : "";
+        const tip = oc.map(o=>o.empresa+(o.ci?" ("+fechaCorta(o.ci)+" → "+(o.co?fechaCorta(o.co):"?")+")":"")+(o.texto?": "+o.texto:"")).join(" | ");
+        return sep+`<td class="hc ${marca}${fin}">${esc(etiquetaHab(h))}</td><td class="fc ocu ${choque?"conf":""} ${dim?"dim":""}${fin}" style="background:${color(principal.empresa)}" title="${esc(tip)}">${titulo}${mas}${detalle?`<small>${detalle}</small>`:""}</td>`;
       }).join("") + "</tr>";
     }
-    return `<div class="pdf-wrap"><table class="pdf-room">${filas}</table></div>`;
+    const tabla = `<table class="pdf-room">${filas}</table>`;
+    return `<div class="pdf-wrap">${bi===0 ? `<div class="room-fila">${tabla}${lateral}</div>` : tabla}</div>`;
   }).join("");
 
   const titulo = roomVista==="master" ? "Rooming MASTER · todas las empresas" : "Rooming · " + esc(roomVista);
   cuerpo.innerHTML = avisos.join("") + `<div class="room-titulo">${titulo}</div>` + bloques;
 }
+document.getElementById("roomCuerpo").addEventListener("click", ev=>{
+  const b = ev.target.closest(".rl-item[data-v]"); if(!b) return;
+  roomVista = b.dataset.v; pintarRooming();
+});
 document.getElementById("roomChips").addEventListener("click", ev=>{
   const b = ev.target.closest(".room-chip[data-v]"); if(!b) return;
   roomVista = b.dataset.v; pintarRooming();
